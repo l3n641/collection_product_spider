@@ -70,7 +70,7 @@ class ProductExcel(object):
         file_name = os.path.basename(self.path)
         return file_name.split('.')[0].split("_")[-1].upper()
 
-    def write_product_detail(self, product_detail_data, sheet_name="Sheet4"):
+    def write_product_detail(self, product_detail_data, project_name, default_brand=None, sheet_name="Sheet4"):
         path = self.get_save_dir_path()
 
         columns = ["featured_image", "LANG", "CAT-0", "Category", "SIZE", "SKU", "Style-Name", "TITLE", "Brand",
@@ -96,38 +96,38 @@ class ProductExcel(object):
                     continue
 
                 data = [
-                    product.featured_image,
+                    project_name + "/" + product.featured_image,
                     self.lange,
                     product.cat_0,
-                    product.category,
+                    product.category_name,
                     product.size,
                     product.sku,
                     product.title,
                     product.title,
-                    product.brand,
-                    product.brand,
+                    product.get_brand(default_brand),
+                    product.get_brand(default_brand),
                     "",
-                    product.type,
+                    product.category_type,
                     product.gender,
                     product.gender,
                     product.color,
                     product.color,
-                    product.description,
-                    product.description,
+                    product.basc,
+                    product.basc,
                     product.price,
                     product.price,
                     "", "", "", "", "", "", "", "",
                     product.dade,
-                    product.url, ]
+                    product.PageUrl, ]
                 for i in range(len(columns)):
                     sheet.cell(row=row, column=i + 1).value = data[i]
                 row = row + 1
             file_path = os.path.join(path, self.file_name)
-            workbook.save(file_path)  # 保存
+            workbook.save(self.path)  # 保存
             workbook.close()  # 关闭
             return True
         except Exception as e:
-            return False
+            raise e
 
     @property
     def file_base_name(self):
