@@ -64,7 +64,13 @@ ROBOTSTXT_OBEY = False
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'html_website_spider.pipelines.ProductUrlPipeline': 300,
+    'html_website_spider.pipelines.ImageDownloadPipeline': 1,
 }
+
+# 设置图片下载路径
+IMAGES_STORE = 'F:\scrapy_down\\0006_hm_fr'
+# 过期天数
+IMAGES_EXPIRES = 90  # 90天内抓取的都不会被重抓
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -86,3 +92,20 @@ ITEM_PIPELINES = {
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+
+# 默认: True，启用logging
+LOG_ENABLED = True
+
+# 默认: 'utf-8'，logging使用的编码
+LOG_ENCODING = "utf-8"
+
+# 默认: None，在当前目录里创建logging输出文件的文件名
+LOG_FILE = "data/name.log"
+
+# 默认: 'DEBUG'，log的最低级别
+LOG_LEVEL = "WARNING"
+
+# 默认: False 如果为 True，进程所有的标准输出(及错误)将会被重定向到log中。
+# 例如，执行 print "hello" ，其将会在Scrapy log中显示。
+LOG_STDOUT = False
