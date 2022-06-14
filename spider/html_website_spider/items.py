@@ -24,9 +24,3 @@ class ProductDetailItem(scrapy.Item):
     basc = scrapy.Field()
     brand = scrapy.Field()
     img = scrapy.Field()
-
-
-class ImagesItem(scrapy.Item):
-    image_urls = scrapy.Field()
-    images = scrapy.Field()
-    image_paths = scrapy.Field()

@@ -8,31 +8,25 @@
 from itemadapter import ItemAdapter
 from .items import ProductUrlItem, ProductDetailItem
 from .models import ProductUrl, ProductDetail
-from . import Session
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy import Request
+from spider.html_website_spider.libs.sqlite import Sqlite
 
 
 class ProductUrlPipeline:
-    def open_spider(self, spider):
-        session = Session()
-        self.session = session
 
     def process_item(self, item, spider):
         if not isinstance(item, ProductUrlItem):
             return item
 
+        session = Sqlite.get_session()
+
         model = ProductUrl(url=item.get("url"), category_name=item.get("category_name"), referer=item.get("referer"))
-        self.session.add(model)
-        self.session.commit()
+        session.add(model)
+        session.commit()
 
 
 class ImageDownloadPipeline(ImagesPipeline):
-
-    def open_spider(self, spider):
-        super(ImageDownloadPipeline, self).open_spider(spider)
-        session = Session()
-        self.session = session
 
     def get_media_requests(self, item, info):
         if not isinstance(item, ProductDetailItem):
@@ -65,8 +59,10 @@ class ImageDownloadPipeline(ImagesPipeline):
             "brand": item.get("brand"),
         }
         model = ProductDetail(**data)
-        self.session.add(model)
-        self.session.commit()
+        session = Sqlite.get_session()
+
+        session.add(model)
+        session.commit()
         return item
 
     def file_path(self, request, response=None, info=None, *, item=None):

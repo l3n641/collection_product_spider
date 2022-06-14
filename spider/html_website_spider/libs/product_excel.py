@@ -9,16 +9,6 @@ class ProductExcel(object):
         file_name = os.path.basename(self.path)
         self.file_name = file_name
 
-    def get_save_dir_path(self):
-        file_name = os.path.basename(self.path)
-        file_dir = os.path.dirname(self.path)
-        sub_dir, _ = file_name.split(".")
-        path = os.path.join(file_dir, "data", sub_dir)
-        if not os.path.exists(path):
-            os.mkdir(path)
-
-        return path
-
     def get_category(self, gender_column=1, cat_0_column=2, type_column=3, url_column=4, sheet_name='Sheet1'):
         # 1.打开 Excel
         try:
@@ -71,7 +61,6 @@ class ProductExcel(object):
         return file_name.split('.')[0].split("_")[-1].upper()
 
     def write_product_detail(self, product_detail_data, project_name, default_brand=None, sheet_name="Sheet4"):
-        path = self.get_save_dir_path()
 
         columns = ["featured_image", "LANG", "CAT-0", "Category", "SIZE", "SKU", "Style-Name", "TITLE", "Brand",
                    "Brand-name", "model", "Type", "Gender", "Gender-name", "Color", "Color-Name", "desc", "desc2",
@@ -122,7 +111,6 @@ class ProductExcel(object):
                 for i in range(len(columns)):
                     sheet.cell(row=row, column=i + 1).value = data[i]
                 row = row + 1
-            file_path = os.path.join(path, self.file_name)
             workbook.save(self.path)  # 保存
             workbook.close()  # 关闭
             return True
@@ -130,6 +118,6 @@ class ProductExcel(object):
             raise e
 
     @property
-    def file_base_name(self):
+    def project_name(self):
         file_name = os.path.basename(self.path).split(".")[0]
         return file_name

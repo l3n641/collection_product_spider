@@ -1,30 +1,15 @@
 import json
-
 import scrapy
-from ..libs.productExcel import ProductExcel
 from ..items import ProductUrlItem, ProductDetailItem
 import re
 from datetime import datetime
+from .common_spider import CommonSpider
 
 
-class HmFrSpider(scrapy.Spider):
+class HmFrSpider(CommonSpider):
     name = 'hm_fr'
     allowed_domains = ['www2.hm.com']
     BASE_URL = "https://www2.hm.com/"
-
-    def __init__(self, category_file_path=None, *args, **kwargs):
-        self.category_file_path = category_file_path
-        super(HmFrSpider).__init__(*args, **kwargs)
-
-    def start_requests(self):
-        path = self.category_file_path
-        excel = ProductExcel(path)
-        data = excel.get_category()
-        for url in data.keys():
-            meta = {
-                "category_name": data.get(url)
-            }
-            yield scrapy.Request(url, meta=meta, callback=self.parse_product_list)
 
     def parse_product_list(self, response, **kwargs):
         product_detail_url_xpath = '//h3[@class="item-heading"]/a'

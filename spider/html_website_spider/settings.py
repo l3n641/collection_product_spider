@@ -94,18 +94,3 @@ IMAGES_EXPIRES = 90  # 90天内抓取的都不会被重抓
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 
-# 默认: True，启用logging
-LOG_ENABLED = True
-
-# 默认: 'utf-8'，logging使用的编码
-LOG_ENCODING = "utf-8"
-
-# 默认: None，在当前目录里创建logging输出文件的文件名
-LOG_FILE = "data/name.log"
-
-# 默认: 'DEBUG'，log的最低级别
-LOG_LEVEL = "WARNING"
-
-# 默认: False 如果为 True，进程所有的标准输出(及错误)将会被重定向到log中。
-# 例如，执行 print "hello" ，其将会在Scrapy log中显示。
-LOG_STDOUT = False

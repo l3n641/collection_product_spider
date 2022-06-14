@@ -3,8 +3,8 @@ import os.path
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
-from html_website_spider.models import ProductUrl, ProductDetail
-from html_website_spider.libs.productExcel import ProductExcel
+from spider.models import ProductUrl, ProductDetail
+from spider.libs.productExcel import ProductExcel
 import click
 
 
