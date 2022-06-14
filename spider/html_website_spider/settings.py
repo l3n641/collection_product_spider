@@ -64,11 +64,11 @@ ROBOTSTXT_OBEY = False
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'html_website_spider.pipelines.ProductUrlPipeline': 300,
-    'html_website_spider.pipelines.ImageDownloadPipeline': 1,
+    'html_website_spider.pipelines.ProductDetailPipeline': 299,
 }
 
 # 设置图片下载路径
-IMAGES_STORE = 'F:\scrapy_down\\0006_hm_fr'
+IMAGES_STORE = 'F:\scrapy_down'
 # 过期天数
 IMAGES_EXPIRES = 90  # 90天内抓取的都不会被重抓
 
@@ -92,5 +92,3 @@ IMAGES_EXPIRES = 90  # 90天内抓取的都不会被重抓
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-
-

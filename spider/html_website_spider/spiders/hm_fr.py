@@ -51,6 +51,7 @@ class HmFrSpider(CommonSpider):
                     price = self.get_price(sku_data)
 
                     item = {
+                        "project_name": self.project_name,
                         "PageUrl": response.url,
                         "category_name": response.meta.get("category_name"),
                         "sku": product_data.get("sku"),

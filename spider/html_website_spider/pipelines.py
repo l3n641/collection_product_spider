@@ -10,7 +10,7 @@ from .items import ProductUrlItem, ProductDetailItem
 from .models import ProductUrl, ProductDetail
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy import Request
-from spider.html_website_spider.libs.sqlite import Sqlite
+from .libs.sqlite import Sqlite
 
 
 class ProductUrlPipeline:
@@ -26,7 +26,7 @@ class ProductUrlPipeline:
         session.commit()
 
 
-class ImageDownloadPipeline(ImagesPipeline):
+class ProductDetailPipeline(ImagesPipeline):
 
     def get_media_requests(self, item, info):
         if not isinstance(item, ProductDetailItem):
@@ -67,4 +67,4 @@ class ImageDownloadPipeline(ImagesPipeline):
 
     def file_path(self, request, response=None, info=None, *, item=None):
         image_guid = request.meta.get("img_id")
-        return f'{item.get("sku")}/{image_guid}.jpg'
+        return f'{item.get("project_name")}/{item.get("sku")}/{image_guid}.jpg'

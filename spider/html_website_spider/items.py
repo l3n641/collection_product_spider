@@ -13,6 +13,7 @@ class ProductUrlItem(scrapy.Item):
 
 
 class ProductDetailItem(scrapy.Item):
+    project_name = scrapy.Field()
     PageUrl = scrapy.Field()
     category_name = scrapy.Field()
     sku = scrapy.Field()
