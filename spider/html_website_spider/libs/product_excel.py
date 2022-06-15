@@ -60,7 +60,7 @@ class ProductExcel(object):
         file_name = os.path.basename(self.path)
         return file_name.split('.')[0].split("_")[-1].upper()
 
-    def write_product_detail(self, product_detail_data, project_name, default_brand=None, sheet_name="Sheet4"):
+    def write_product_detail(self, product_detail_data, default_brand=None, sheet_name="Sheet4"):
 
         columns = ["featured_image", "LANG", "CAT-0", "Category", "SIZE", "SKU", "Style-Name", "TITLE", "Brand",
                    "Brand-name", "model", "Type", "Gender", "Gender-name", "Color", "Color-Name", "desc", "desc2",
@@ -85,7 +85,7 @@ class ProductExcel(object):
                     continue
 
                 data = [
-                    project_name + "/" + product.featured_image,
+                    product.featured_image,
                     self.lange,
                     product.cat_0,
                     product.category_name,
