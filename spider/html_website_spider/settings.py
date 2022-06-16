@@ -7,6 +7,27 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+PROJECT_STORE = os.getenv("PROJECT_STORE")
+if not PROJECT_STORE:
+    raise ValueError("还未定义项目路径")
+
+db_store = os.path.join(PROJECT_STORE, 'database')
+image_store = os.path.join(PROJECT_STORE, 'image')
+log_path = os.path.join(PROJECT_STORE, 'logs')
+
+if not os.path.exists(db_store):
+    os.makedirs(db_store)
+
+if not os.path.exists(image_store):
+    os.makedirs(image_store)
+
+if not os.path.exists(log_path):
+    os.makedirs(log_path)
 
 BOT_NAME = 'html_website_spider'
 
@@ -68,9 +89,11 @@ ITEM_PIPELINES = {
 }
 
 # 设置图片下载路径
-IMAGES_STORE = 'F:\scrapy_down'
+IMAGES_STORE = image_store
 # 过期天数
 IMAGES_EXPIRES = 90  # 90天内抓取的都不会被重抓
+
+DB_DIR_PATH = db_store
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

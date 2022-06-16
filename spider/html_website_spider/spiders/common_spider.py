@@ -9,16 +9,15 @@ import scrapy
 class CommonSpider(scrapy.Spider):
     project_name = None
 
-    def __init__(self, category_file_path=None, *args, **kwargs):
+    def __init__(self, category_file=None, *args, **kwargs):
 
         super(CommonSpider).__init__(*args, **kwargs)
 
+        project_settings = get_project_settings()
+        category_file_path = os.path.join(project_settings.get("PROJECT_STORE"), category_file)
+
         if not os.path.exists(category_file_path):
             raise ValueError("产品类别文件不存在")
-
-        project_settings = get_project_settings()
-        if not project_settings.get("IMAGES_STORE"):
-            raise ValueError("请配置图片保存目录")
 
         file = ProductExcel(category_file_path)
         product_category = file.get_category()
