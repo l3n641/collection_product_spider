@@ -20,7 +20,7 @@ class Sqlite(object):
             os.makedirs(db_dir_path)
 
         db_path = os.path.join(db_dir_path, project_name)
-        engine = create_engine(f"sqlite:///{db_path}", echo=False, poolclass=StaticPool,
+        engine = create_engine(f"sqlite:///{db_path}.db", echo=False, poolclass=StaticPool,
                                connect_args={'check_same_thread': False})
         cls._engine = engine
         return engine
