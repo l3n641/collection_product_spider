@@ -60,13 +60,13 @@ class ProductExcel(object):
         file_name = os.path.basename(self.path)
         return file_name.split('.')[0].split("_")[-1].upper()
 
-    def write_product_detail(self, product_detail_data, default_brand=None, sheet_name="Sheet4"):
+    def write_product_detail(self, product_detail_data, default_brand=None, sheet_name="Sheet4", export_path=None):
 
         columns = ["featured_image", "LANG", "CAT-0", "Category", "SIZE", "SKU", "Style-Name", "TITLE", "Brand",
                    "Brand-name", "model", "Type", "Gender", "Gender-name", "Color", "Color-Name", "desc", "desc2",
                    "price", "price2", "Description", "Keyword", "IMG-Add", "NPrice", "OPrice", "max", "min", "NSize",
                    "Date", "PageUrl"]
-
+        export_path = export_path or self.path
         try:
 
             workbook = load_workbook(filename=self.path)
@@ -111,7 +111,7 @@ class ProductExcel(object):
                 for i in range(len(columns)):
                     sheet.cell(row=row, column=i + 1).value = data[i]
                 row = row + 1
-            workbook.save(self.path)  # 保存
+            workbook.save(export_path)  # 保存
             workbook.close()  # 关闭
             return True
         except Exception as e:

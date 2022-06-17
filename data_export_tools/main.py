@@ -12,6 +12,7 @@ from spider.html_website_spider.libs.product_excel import ProductExcel
 from PySide6.QtGui import QTextCursor
 from spider.html_website_spider.models import ProductDetail
 from functions import filter_empty_image
+from size_guide import SizeGuide
 
 
 class MainWindow(QMainWindow):
@@ -28,6 +29,8 @@ class MainWindow(QMainWindow):
         self.main_view.button_check_data.clicked.connect(self.check_data)
         self.main_view.button_set_default_brand.clicked.connect(self.set_default_brand)
         self.main_view.button_export_data.clicked.connect(self.export_data)
+        self.main_view.combobox_size_temolate.currentTextChanged.connect(self.get_size_tmp_detail)
+        self.main_view.button_update_size.clicked.connect(self.update_size_by_category)
 
     def load_project_file(self):
         project_path = os.getenv("PROJECT_STORE", QDir.currentPath())
@@ -46,6 +49,17 @@ class MainWindow(QMainWindow):
         if not os.path.exists(image_dir):
             QMessageBox.critical(self, "错误", "图片目录不存在", QMessageBox.Yes, QMessageBox.Yes)
             return False
+
+        category_data = file.get_category()
+        if not category_data:
+            QMessageBox.critical(self, "错误", "加载文件失败", QMessageBox.Yes, QMessageBox.Yes)
+            return False
+
+        for url in category_data:
+            self.main_view.combo_box_category.addItem(category_data.get(url))
+
+        data = SizeGuide.get_size_name_list()
+        self.main_view.combobox_size_temolate.addItems(data)
 
         self.database_file = database_file
         self.image_dir = image_dir
@@ -87,8 +101,30 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "信息", "设置默认品牌成功", QMessageBox.Yes)
 
     def export_data(self):
-        self.product_file.write_product_detail(self.product_details, self.default_brand)
+        save_dir = os.path.dirname(self.product_file.path)
+        export_dir = os.path.join(save_dir, "export")
+        if not os.path.exists(export_dir):
+            os.makedirs(export_dir)
+        export_path = os.path.join(export_dir, self.product_file.file_name)
+        self.product_file.write_product_detail(self.product_details, self.default_brand, export_path=export_path)
         QMessageBox.information(self, "信息", "导出完成", QMessageBox.Yes)
+
+    def get_size_tmp_detail(self, value):
+        data = value.split("->")
+        res = SizeGuide.get_default_size(*data)
+        if res:
+            self.main_view.input_size.setText('|'.join(res))
+
+    def update_size_by_category(self):
+        new_size = self.main_view.input_size.text()
+        category = self.main_view.combo_box_category.currentText()
+        row = 0
+        for item in self.product_details:
+            if item.category_name == category:
+                item.size = new_size
+                row = row + 1
+
+        self.main_view.textarea_log.append(f"类别:{category},更新尺码{new_size}，更新数量{row}")
 
 
 if __name__ == "__main__":
