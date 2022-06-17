@@ -45,6 +45,15 @@ class ProductDetailPipeline(ImagesPipeline):
 
         img = '|'.join(image_paths)
         size = '|'.join(item.get("size")) if item.get("size") else None
+
+        try:
+            if item.get("price"):
+                price = float(item.get("price"))
+            else:
+                price = 0
+        except Exception as e:
+            price = 0
+
         data = {
             "PageUrl": item.get("PageUrl"),
             "category_name": item.get("category_name"),
@@ -52,7 +61,7 @@ class ProductDetailPipeline(ImagesPipeline):
             "color": item.get("color"),
             "size": size,
             "img": img,
-            "price": item.get("price"),
+            "price": price,
             "title": item.get("title"),
             "dade": item.get("dade"),
             "basc": item.get("basc"),

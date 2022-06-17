@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, create_engine, Integer, Text, DATETIME
+from sqlalchemy import Column, String, create_engine, Integer, Text, DATETIME,Float
 from sqlalchemy.ext.declarative import declarative_base
 import re
 
@@ -24,7 +24,7 @@ class ProductDetail(Base):
     sku = Column(String(32))
     color = Column(Text)
     size = Column(Text)
-    price = Column(Text)
+    price = Column(Float)
     title = Column(Text)
     dade = Column(DATETIME)
     basc = Column(Text)

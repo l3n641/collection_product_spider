@@ -16,9 +16,9 @@ class ProductExcel(object):
             sheet = workbook[sheet_name]
             data = {}
             for row in range(1, sheet.max_row + 1):
-                gender = sheet.cell(row=row, column=gender_column).value.strip()
-                cat_0 = sheet.cell(row=row, column=cat_0_column).value.strip()
-                type_data = sheet.cell(row=row, column=type_column).value.strip()
+                gender = sheet.cell(row=row, column=gender_column).value.strip().title()
+                cat_0 = sheet.cell(row=row, column=cat_0_column).value.strip().title()
+                type_data = sheet.cell(row=row, column=type_column).value.strip().title()
                 url = sheet.cell(row=row, column=url_column).value.strip()
                 category = f"{gender}->{cat_0}->{type_data}"
                 data[url] = category
