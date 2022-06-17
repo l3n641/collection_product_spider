@@ -1,0 +1,148 @@
+# -*- coding: utf-8 -*-
+
+################################################################################
+## Form generated from reading UI file 'main_window.ui'
+##
+## Created by: Qt User Interface Compiler version 6.3.0
+##
+## WARNING! All changes made in this file will be lost when recompiling UI file!
+################################################################################
+
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QGroupBox, QLabel,
+    QLineEdit, QMainWindow, QMenuBar, QPushButton,
+    QSizePolicy, QStatusBar, QTextEdit, QWidget)
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        if not MainWindow.objectName():
+            MainWindow.setObjectName(u"MainWindow")
+        MainWindow.resize(794, 583)
+        MainWindow.setMaximumSize(QSize(794, 583))
+        self.centralwidget = QWidget(MainWindow)
+        self.centralwidget.setObjectName(u"centralwidget")
+        self.groupBox = QGroupBox(self.centralwidget)
+        self.groupBox.setObjectName(u"groupBox")
+        self.groupBox.setGeometry(QRect(10, 80, 771, 101))
+        self.check_box_filter_image = QCheckBox(self.groupBox)
+        self.check_box_filter_image.setObjectName(u"check_box_filter_image")
+        self.check_box_filter_image.setGeometry(QRect(20, 30, 161, 20))
+        self.check_box_filter_image.setChecked(True)
+        self.input_filter_repeat_product = QLineEdit(self.groupBox)
+        self.input_filter_repeat_product.setObjectName(u"input_filter_repeat_product")
+        self.input_filter_repeat_product.setGeometry(QRect(150, 60, 141, 21))
+        self.input_filter_min_price = QLineEdit(self.groupBox)
+        self.input_filter_min_price.setObjectName(u"input_filter_min_price")
+        self.input_filter_min_price.setGeometry(QRect(430, 60, 113, 21))
+        self.label_5 = QLabel(self.groupBox)
+        self.label_5.setObjectName(u"label_5")
+        self.label_5.setGeometry(QRect(310, 60, 81, 16))
+        self.checkbox_filter_invalidate_product = QCheckBox(self.groupBox)
+        self.checkbox_filter_invalidate_product.setObjectName(u"checkbox_filter_invalidate_product")
+        self.checkbox_filter_invalidate_product.setGeometry(QRect(300, 20, 151, 20))
+        self.checkbox_filter_invalidate_product.setChecked(True)
+        self.label_6 = QLabel(self.groupBox)
+        self.label_6.setObjectName(u"label_6")
+        self.label_6.setGeometry(QRect(20, 60, 91, 16))
+        self.button_check_data = QPushButton(self.groupBox)
+        self.button_check_data.setObjectName(u"button_check_data")
+        self.button_check_data.setGeometry(QRect(594, 60, 91, 24))
+        self.button_set_default_brand = QPushButton(self.groupBox)
+        self.button_set_default_brand.setObjectName(u"button_set_default_brand")
+        self.button_set_default_brand.setGeometry(QRect(450, 20, 91, 24))
+        self.input_default_brand = QLineEdit(self.groupBox)
+        self.input_default_brand.setObjectName(u"input_default_brand")
+        self.input_default_brand.setGeometry(QRect(590, 20, 113, 21))
+        self.groupBox_2 = QGroupBox(self.centralwidget)
+        self.groupBox_2.setObjectName(u"groupBox_2")
+        self.groupBox_2.setGeometry(QRect(10, 180, 771, 131))
+        self.label = QLabel(self.groupBox_2)
+        self.label.setObjectName(u"label")
+        self.label.setGeometry(QRect(20, 30, 81, 21))
+        self.input_total_quantity = QLineEdit(self.groupBox_2)
+        self.input_total_quantity.setObjectName(u"input_total_quantity")
+        self.input_total_quantity.setGeometry(QRect(150, 30, 113, 21))
+        self.input_total_quantity.setReadOnly(True)
+        self.label_2 = QLabel(self.groupBox_2)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setGeometry(QRect(320, 30, 91, 16))
+        self.input_validate_quantity = QLineEdit(self.groupBox_2)
+        self.input_validate_quantity.setObjectName(u"input_validate_quantity")
+        self.input_validate_quantity.setGeometry(QRect(442, 30, 121, 21))
+        self.input_validate_quantity.setReadOnly(True)
+        self.input_image_failed_quantity = QLineEdit(self.groupBox_2)
+        self.input_image_failed_quantity.setObjectName(u"input_image_failed_quantity")
+        self.input_image_failed_quantity.setGeometry(QRect(150, 80, 113, 21))
+        self.input_image_failed_quantity.setReadOnly(True)
+        self.label_3 = QLabel(self.groupBox_2)
+        self.label_3.setObjectName(u"label_3")
+        self.label_3.setGeometry(QRect(20, 80, 91, 16))
+        self.label_4 = QLabel(self.groupBox_2)
+        self.label_4.setObjectName(u"label_4")
+        self.label_4.setGeometry(QRect(320, 75, 81, 31))
+        self.input_repeat_quantity = QLineEdit(self.groupBox_2)
+        self.input_repeat_quantity.setObjectName(u"input_repeat_quantity")
+        self.input_repeat_quantity.setGeometry(QRect(440, 80, 121, 21))
+        self.input_repeat_quantity.setReadOnly(True)
+        self.button_export_data = QPushButton(self.groupBox_2)
+        self.button_export_data.setObjectName(u"button_export_data")
+        self.button_export_data.setGeometry(QRect(610, 80, 75, 24))
+        self.groupBox_3 = QGroupBox(self.centralwidget)
+        self.groupBox_3.setObjectName(u"groupBox_3")
+        self.groupBox_3.setGeometry(QRect(10, 310, 771, 231))
+        self.textarea_log = QTextEdit(self.groupBox_3)
+        self.textarea_log.setObjectName(u"textarea_log")
+        self.textarea_log.setGeometry(QRect(10, 30, 751, 191))
+        self.textarea_log.setReadOnly(True)
+        self.groupBox_4 = QGroupBox(self.centralwidget)
+        self.groupBox_4.setObjectName(u"groupBox_4")
+        self.groupBox_4.setGeometry(QRect(10, 10, 771, 71))
+        self.button_load_project = QPushButton(self.groupBox_4)
+        self.button_load_project.setObjectName(u"button_load_project")
+        self.button_load_project.setGeometry(QRect(20, 20, 141, 24))
+        self.label_project_file = QLabel(self.groupBox_4)
+        self.label_project_file.setObjectName(u"label_project_file")
+        self.label_project_file.setGeometry(QRect(190, 21, 531, 20))
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QMenuBar(MainWindow)
+        self.menubar.setObjectName(u"menubar")
+        self.menubar.setGeometry(QRect(0, 0, 794, 22))
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QStatusBar(MainWindow)
+        self.statusbar.setObjectName(u"statusbar")
+        MainWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi(MainWindow)
+
+        QMetaObject.connectSlotsByName(MainWindow)
+    # setupUi
+
+    def retranslateUi(self, MainWindow):
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"scrapy \u6570\u636e\u5bfc\u51fa\u5de5\u5177", None))
+        self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"\u8fc7\u6ee4", None))
+        self.check_box_filter_image.setText(QCoreApplication.translate("MainWindow", u"\u8fc7\u6ee4\u56fe\u7247\u4e0b\u8f7d\u5931\u8d25\u7684\u4ea7\u54c1", None))
+        self.input_filter_repeat_product.setText(QCoreApplication.translate("MainWindow", u"sku", None))
+        self.input_filter_min_price.setText(QCoreApplication.translate("MainWindow", u"10.00", None))
+        self.label_5.setText(QCoreApplication.translate("MainWindow", u"\u8fc7\u6ee4\u6700\u4f4e\u4ef7\u683c", None))
+        self.checkbox_filter_invalidate_product.setText(QCoreApplication.translate("MainWindow", u"\u8fc7\u6ee4\u65e0\u6548\u4ea7\u54c1", None))
+        self.label_6.setText(QCoreApplication.translate("MainWindow", u"\u8fc7\u6ee4\u91cd\u590d\u4ea7\u54c1", None))
+        self.button_check_data.setText(QCoreApplication.translate("MainWindow", u"\u68c0\u67e5", None))
+        self.button_set_default_brand.setText(QCoreApplication.translate("MainWindow", u"\u8bbe\u7f6e\u9ed8\u8ba4\u54c1\u724c", None))
+        self.groupBox_2.setTitle(QCoreApplication.translate("MainWindow", u"\u6570\u636e", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"\u603b\u8bb0\u5f55\u6570", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"\u7b5b\u9009\u540e\u8bb0\u5f55\u6570", None))
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"\u56fe\u7247\u4e0b\u8f7d\u5931\u8d25\u6570", None))
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"\u91cd\u590d\u6570\u636e\u6570", None))
+        self.button_export_data.setText(QCoreApplication.translate("MainWindow", u"\u5bfc\u51fa", None))
+        self.groupBox_3.setTitle(QCoreApplication.translate("MainWindow", u"\u65e5\u5fd7", None))
+        self.groupBox_4.setTitle(QCoreApplication.translate("MainWindow", u"\u52a0\u8f7d", None))
+        self.button_load_project.setText(QCoreApplication.translate("MainWindow", u"\u52a0\u8f7d\u9879\u76ee\u6587\u4ef6(excel)", None))
+        self.label_project_file.setText("")
+    # retranslateUi
+
