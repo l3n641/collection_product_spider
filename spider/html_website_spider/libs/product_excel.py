@@ -83,13 +83,13 @@ class ProductExcel(object):
             for product in product_detail_data:
                 if not product.featured_image or not product.title:
                     continue
-
+                size = "|".join(set(product.size.split("|"))) if product.size else None
                 data = [
                     product.featured_image,
                     self.lange,
                     product.cat_0,
                     product.category_name,
-                    product.size,
+                    size,
                     product.sku,
                     product.title,
                     product.title,
