@@ -115,7 +115,7 @@ class ProductExcel(object):
             workbook.close()  # 关闭
             return True
         except Exception as e:
-            raise e
+            return False
 
     @property
     def project_name(self):

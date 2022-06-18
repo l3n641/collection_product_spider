@@ -31,6 +31,9 @@ class MainWindow(QMainWindow):
         self.main_view.button_export_data.clicked.connect(self.export_data)
         self.main_view.combobox_size_temolate.currentTextChanged.connect(self.get_size_tmp_detail)
         self.main_view.button_update_size.clicked.connect(self.update_size_by_category)
+        self.main_view.combo_box_category.currentTextChanged.connect(self.set_category_to_category_size_input)
+        self.main_view.combobox_category_name.currentTextChanged.connect(self.set_category_to_old_category_input)
+        self.main_view.button_upate_category_name.clicked.connect(self.update_category_name)
 
     def load_project_file(self):
         project_path = os.getenv("PROJECT_STORE", QDir.currentPath())
@@ -57,6 +60,7 @@ class MainWindow(QMainWindow):
 
         for url in category_data:
             self.main_view.combo_box_category.addItem(category_data.get(url))
+            self.main_view.combobox_category_name.addItem(category_data.get(url))
 
         data = SizeGuide.get_size_name_list()
         self.main_view.combobox_size_temolate.addItems(data)
@@ -106,8 +110,13 @@ class MainWindow(QMainWindow):
         if not os.path.exists(export_dir):
             os.makedirs(export_dir)
         export_path = os.path.join(export_dir, self.product_file.file_name)
-        self.product_file.write_product_detail(self.product_details, self.default_brand, export_path=export_path)
-        QMessageBox.information(self, "信息", "导出完成", QMessageBox.Yes)
+        state = self.product_file.write_product_detail(self.product_details, self.default_brand,
+                                                       export_path=export_path)
+
+        if state:
+            QMessageBox.information(self, "信息", "导出完成", QMessageBox.Yes)
+        else:
+            QMessageBox.critical(self, "错误", "导出数据失败", QMessageBox.Yes, QMessageBox.Yes)
 
     def get_size_tmp_detail(self, value):
         data = value.split("->")
@@ -115,12 +124,29 @@ class MainWindow(QMainWindow):
         if res:
             self.main_view.input_size.setText('|'.join(res))
 
-    def update_size_by_category(self):
-        new_size = self.main_view.input_size.text()
-        category = self.main_view.combo_box_category.currentText()
+    def set_category_to_category_size_input(self, value):
+        self.main_view.input_category_pattern.setText(value)
+
+    def set_category_to_old_category_input(self, value):
+        self.main_view.input_category_name_pattern.setText(value)
+
+    def update_category_name(self):
+        new_category_name = self.main_view.input_new_category_name.text()
+        category = self.main_view.input_category_name_pattern.text()
         row = 0
         for item in self.product_details:
-            if item.category_name == category:
+            if item.category_name and item.category_name.startswith(category):
+                item.category_name = new_category_name
+                row = row + 1
+
+        self.main_view.textarea_log.append(f"类别:{category},更新类别名称{new_category_name}，更新数量{row}")
+
+    def update_size_by_category(self):
+        new_size = self.main_view.input_size.text()
+        category = self.main_view.input_category_pattern.text()
+        row = 0
+        for item in self.product_details:
+            if item.category_name and item.category_name.startswith(category):
                 item.size = new_size
                 row = row + 1
 
