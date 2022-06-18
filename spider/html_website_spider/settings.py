@@ -35,7 +35,7 @@ SPIDER_MODULES = ['html_website_spider.spiders']
 NEWSPIDER_MODULE = 'html_website_spider.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'html_website_spider (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -115,3 +115,7 @@ DB_DIR_PATH = db_store
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+
+# 默认: 'DEBUG'，log的最低级别
+LOG_LEVEL = "WARNING"
