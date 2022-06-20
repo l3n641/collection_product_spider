@@ -34,4 +34,8 @@ class CommonSpider(scrapy.Spider):
             meta = {
                 "category_name": product_category.get(url)
             }
-            yield scrapy.Request(url, meta=meta, callback=self.parse_product_list)
+            yield scrapy.Request(url, meta=meta, callback=self.parse_product_list, errback=self.start_request_error)
+
+    @staticmethod
+    def start_request_error(failure):
+        print(f"excel 链接无效:{failure.request.url}")
