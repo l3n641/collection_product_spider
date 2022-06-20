@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 import sys
-
+from sqlalchemy import func, distinct
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 from data_export_tools.views.ui_main_window import Ui_MainWindow
 from dotenv import load_dotenv
@@ -10,7 +10,7 @@ from PySide6.QtCore import QDir
 from functions import get_sqlite_session
 from spider.html_website_spider.libs.product_excel import ProductExcel
 from PySide6.QtGui import QTextCursor
-from spider.html_website_spider.models import ProductDetail
+from spider.html_website_spider.models import ProductDetail, ProductUrl
 from functions import filter_empty_image
 from size_guide import SizeGuide
 
@@ -76,6 +76,11 @@ class MainWindow(QMainWindow):
 
         self.main_view.textarea_log.moveCursor(QTextCursor.End)
         self.main_view.textarea_log.append("加载成功")
+        category_list = file.get_category()
+        self.main_view.textarea_log.append(f"excel 包含链接数:{len(category_list)}")
+
+        spider_base_url_quantity, *_ = session.query(func.count(distinct(ProductUrl.referer))).first()
+        self.main_view.textarea_log.append(f"实际爬取基础链接数:{spider_base_url_quantity}")
 
     def check_data(self):
         session = get_sqlite_session(self.database_file)
