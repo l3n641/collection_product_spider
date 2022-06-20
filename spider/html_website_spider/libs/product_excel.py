@@ -84,6 +84,14 @@ class ProductExcel(object):
                 if not product.featured_image or not product.title:
                     continue
                 size = "|".join(set(product.size.split("|"))) if product.size else None
+                size = ''
+                if product.size:
+                    size_set = []
+                    for size_data in product.size.split("|"):
+                        if size_data not in size_set:
+                            size_set.append(size_data)
+
+                    size = '|'.join(size_set)
                 data = [
                     product.featured_image,
                     self.lange,
