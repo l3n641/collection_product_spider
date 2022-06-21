@@ -2,7 +2,7 @@ import scrapy
 from .zara import ZaraSpider
 
 
-class ZaraFrSpider(ZaraSpider):
+class ZaraFrPtSpider(ZaraSpider):
     name = 'zara_pt'
 
     base_url = 'https://www.zara.com/pt/pt'

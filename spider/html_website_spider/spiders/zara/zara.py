@@ -1,6 +1,6 @@
 import scrapy
-from .common_spider import CommonSpider
-from ..items import ProductUrlItem, ProductDetailItem
+from ..common_spider import CommonSpider
+from .. import ProductUrlItem, ProductDetailItem
 import json
 from datetime import datetime
 
