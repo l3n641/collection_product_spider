@@ -1,13 +1,13 @@
 import json
 import scrapy
-from ..items import ProductUrlItem, ProductDetailItem
+from .. import ProductUrlItem, ProductDetailItem
 import re
 from datetime import datetime
-from .common_spider import CommonSpider
+from ..common_spider import CommonSpider
 
 
-class HmFrSpider(CommonSpider):
-    name = 'hm_fr'
+class HmSpider(CommonSpider):
+    name = 'hm'
     allowed_domains = ['www2.hm.com']
     BASE_URL = "https://www2.hm.com/"
 

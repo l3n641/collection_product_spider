@@ -1,9 +1,7 @@
-import json
 import scrapy
-from ..items import ProductUrlItem, ProductDetailItem
-import re
+from .. import ProductUrlItem, ProductDetailItem
 from datetime import datetime
-from .common_spider import CommonSpider
+from ..common_spider import CommonSpider
 
 
 class Massimodutti(CommonSpider):

@@ -1,7 +1,7 @@
 import scrapy
-from ..items import ProductUrlItem, ProductDetailItem
+from .. import ProductUrlItem, ProductDetailItem
 from datetime import datetime
-from .common_spider import CommonSpider
+from ..common_spider import CommonSpider
 
 
 class Stradivarius(CommonSpider):
@@ -31,8 +31,6 @@ class Stradivarius(CommonSpider):
 
         except Exception as e:
             print(e)
-
-
 
     def parse_product_detail(self, response, **kwargs):
         pattern = "inditex.iProductId = (\d+);"
