@@ -15,9 +15,10 @@ class ZaraSpider(CommonSpider):
 
     def start_requests(self):
         url = "https://www.zara.com/uk/"
-        yield scrapy.Request(url, callback=self.parse_category_list)
+        yield scrapy.Request(url, callback=self.parse_category_list, errback=self.start_request_error)
 
     def parse_category_list(self, response, **kwargs):
+        # 收集category id
         category_xpath = '//li[@data-categoryid]'
         data = response.xpath(category_xpath)
         seo_category_dict = {}
@@ -25,13 +26,11 @@ class ZaraSpider(CommonSpider):
             seo_category_id = item.attrib.get('data-seocategoryid')
             category_id = item.attrib.get('data-categoryid')
             seo_category_dict[seo_category_id] = category_id
-
         for url in self.product_category:
             category_id = self.get_cid_by_seo_category_id(url, seo_category_dict)
             if not category_id:
                 continue
             meta = {"category_name": self.product_category.get(url), "category_id": category_id}
-
             requests_url = f"{self.base_url}/category/{category_id}/products?ajax=true"
             yield scrapy.Request(requests_url, callback=self.parse_product_list, meta=meta)
 
@@ -51,25 +50,28 @@ class ZaraSpider(CommonSpider):
             for product in products:
                 if not product.get('commercialComponents'):
                     continue
-                seo_data = product.get('commercialComponents')[0].get("seo")
-                colors = product.get('commercialComponents')[0].get("detail").get("colors")
-                url = f"{self.base_url}/{seo_data.get('keyword')}-p{seo_data.get('seoProductId')}.html?v1={seo_data.get('discernProductId')}&v2={category_id}"
-                item_data = {
-                    "category_name": category_name,
-                    "url": url,
-                    "referer": response.url,
-                }
-                try:
-                    yield ProductUrlItem(**item_data)
-                except Exception as e:
-                    print(e)
-                else:
-                    meta = {
-                        "category_id": category_id,
+                for commercial in product.get('commercialComponents'):
+                    seo_data = commercial.get("seo")
+                    if not commercial.get("detail"):
+                        continue
+                    colors = commercial.get("detail").get("colors")
+                    url = f"{self.base_url}/{seo_data.get('keyword')}-p{seo_data.get('seoProductId')}.html?v1={seo_data.get('discernProductId')}&v2={category_id}"
+                    item_data = {
                         "category_name": category_name,
-                        "color": colors[0].get("name") if colors else ''
+                        "url": url,
+                        "referer": response.url,
                     }
-                    yield scrapy.Request(url, callback=self.parse_product_detail, meta=meta)
+                    try:
+                        yield ProductUrlItem(**item_data)
+                    except Exception as e:
+                        print(e)
+                    else:
+                        meta = {
+                            "category_id": category_id,
+                            "category_name": category_name,
+                            "color": colors[0].get("name") if colors else ''
+                        }
+                        yield scrapy.Request(url, callback=self.parse_product_detail, meta=meta)
 
     def parse_product_detail(self, response, **kwargs):
         product_data_xpath = '//script[@type="application/ld+json"]'
