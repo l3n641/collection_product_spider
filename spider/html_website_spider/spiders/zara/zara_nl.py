@@ -7,6 +7,4 @@ class ZaraNlSpider(ZaraSpider):
 
     base_url = 'https://www.zara.com/nl/nl/'
 
-    def start_requests(self):
-        url = "https://www.zara.com/nl/"
-        yield scrapy.Request(url, callback=self.parse_category_list)
+    category_url = 'https://www.zara.com/nl/nl/categories?ajax=true'

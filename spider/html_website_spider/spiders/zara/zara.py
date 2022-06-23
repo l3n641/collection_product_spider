@@ -8,33 +8,46 @@ from datetime import datetime
 class ZaraSpider(CommonSpider):
     name = 'zara'
     allowed_domains = ['www.zara.com']
-    custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36",
-    }
+
     base_url = 'https://www.zara.com/uk/en'
+    category_url = 'https://www.zara.com/uk/en/categories?ajax=true'
 
     def start_requests(self):
-        url = "https://www.zara.com/uk/"
-        yield scrapy.Request(url, callback=self.parse_category_list, errback=self.start_request_error)
+        yield scrapy.Request(self.category_url, callback=self.parse_category_list)
 
     def parse_category_list(self, response, **kwargs):
         # 收集category id
-        category_xpath = '//li[@data-categoryid]'
-        data = response.xpath(category_xpath)
+        data_json = response.json()
         seo_category_dict = {}
-        for item in data:
-            seo_category_id = item.attrib.get('data-seocategoryid')
-            category_id = item.attrib.get('data-categoryid')
-            seo_category_dict[seo_category_id] = category_id
+        for parent_category in data_json.get("categories"):
+            category = self.get_sub_category(parent_category)
+            seo_category_dict.update(category)
+
         for url in self.product_category:
             category_id = self.get_cid_by_seo_category_id(url, seo_category_dict)
             if not category_id:
+                print(f"基础链接没有找到：{url}")
                 continue
             meta = {"category_name": self.product_category.get(url), "category_id": category_id}
             requests_url = f"{self.base_url}/category/{category_id}/products?ajax=true"
             yield scrapy.Request(requests_url, callback=self.parse_product_list, meta=meta)
 
-    def get_cid_by_seo_category_id(self, url: str, seo_category_dict):
+    @classmethod
+    def get_sub_category(cls, parent_category: list):
+        category_dict = {}
+        for sub_category in parent_category.get("subcategories"):
+            if not sub_category.get("seo"):
+                continue
+            seo_id = sub_category.get("seo").get("seoCategoryId")
+            category_dict[seo_id] = sub_category.get("id")
+            if sub_category.get("subcategories"):
+                child_category = cls.get_sub_category(sub_category)
+                category_dict.update(child_category)
+
+        return category_dict
+
+    @staticmethod
+    def get_cid_by_seo_category_id(url: str, seo_category_dict: dict):
         for seo_category_id in seo_category_dict:
             if url.endswith(f"{seo_category_id}.html"):
                 return seo_category_dict.get(seo_category_id)
@@ -89,7 +102,8 @@ class ZaraSpider(CommonSpider):
         size = []
         if size_data:
             for item in size_data:
-                size.append(item.root.text)
+                if item.root.text:
+                    size.append(item.root.text)
         images = []
         for image in first_product.get('image'):
             images.append(image.replace("w/1920", "w/1280"))
