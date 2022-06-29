@@ -32,7 +32,9 @@ class CommonSpider(scrapy.Spider):
         product_category = self.product_category
         for url in product_category.keys():
             meta = {
-                "category_name": product_category.get(url)
+                "category_name": product_category.get(url),
+                "referer": url,
+
             }
             yield scrapy.Request(url, meta=meta, callback=self.parse_product_list, errback=self.start_request_error)
 
