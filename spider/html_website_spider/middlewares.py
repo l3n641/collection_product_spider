@@ -2,6 +2,7 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import os
 
 from scrapy import signals
 
@@ -101,3 +102,15 @@ class HtmlWebsiteSpiderDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class SimpleProxyMiddleware(object):
+    def __init__(self, auth_encoding='latin-1'):
+        self.auth_encoding = auth_encoding
+        http_proxy = os.getenv("HTTP_PROXY")
+
+        self.http_proxy = http_proxy
+
+    def _set_proxy(self, request, scheme):
+        if self.http_proxy:
+            request.meta['proxy'] = self.http_proxy

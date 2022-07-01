@@ -71,9 +71,9 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    'html_website_spider.middlewares.HtmlWebsiteSpiderDownloaderMiddleware': 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    'html_website_spider.middlewares.SimpleProxyMiddleware': 543,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
