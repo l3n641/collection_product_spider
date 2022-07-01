@@ -7,6 +7,27 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+PROJECT_STORE = os.getenv("PROJECT_STORE")
+if not PROJECT_STORE:
+    raise ValueError("还未定义项目路径")
+
+db_store = os.path.join(PROJECT_STORE, 'database')
+image_store = os.path.join(PROJECT_STORE, 'image')
+log_path = os.path.join(PROJECT_STORE, 'logs')
+
+if not os.path.exists(db_store):
+    os.makedirs(db_store)
+
+if not os.path.exists(image_store):
+    os.makedirs(image_store)
+
+if not os.path.exists(log_path):
+    os.makedirs(log_path)
 
 BOT_NAME = 'html_website_spider'
 
@@ -14,7 +35,7 @@ SPIDER_MODULES = ['html_website_spider.spiders']
 NEWSPIDER_MODULE = 'html_website_spider.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'html_website_spider (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -64,7 +85,15 @@ ROBOTSTXT_OBEY = False
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'html_website_spider.pipelines.ProductUrlPipeline': 300,
+    'html_website_spider.pipelines.ProductDetailPipeline': 299,
 }
+
+# 设置图片下载路径
+IMAGES_STORE = image_store
+# 过期天数
+IMAGES_EXPIRES = 90  # 90天内抓取的都不会被重抓
+
+DB_DIR_PATH = db_store
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -86,3 +115,7 @@ ITEM_PIPELINES = {
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+
+# 默认: 'DEBUG'，log的最低级别
+LOG_LEVEL = "WARNING"

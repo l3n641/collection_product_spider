@@ -2,3 +2,6 @@
 .idea/
 data/
 __pycache__
+venv/
+.env
+debug.py
