@@ -7,9 +7,9 @@ import scrapy
 
 
 class ProductUrlItem(scrapy.Item):
-    url = scrapy.Field()
-    category_name = scrapy.Field()
-    referer = scrapy.Field()
+    url = scrapy.Field()  # 产品详情的url
+    category_name = scrapy.Field()  # 产品类别名称
+    referer = scrapy.Field()  # 产品类别对应的url
 
 
 class ProductDetailItem(scrapy.Item):

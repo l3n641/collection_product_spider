@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>70</y>
+      <y>80</y>
       <width>1061</width>
       <height>71</height>
      </rect>
@@ -42,23 +42,10 @@
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QLineEdit" name="input_filter_repeat_product">
-     <property name="geometry">
-      <rect>
-       <x>440</x>
-       <y>20</y>
-       <width>141</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>sku</string>
-     </property>
-    </widget>
     <widget class="QLineEdit" name="input_filter_min_price">
      <property name="geometry">
       <rect>
-       <x>700</x>
+       <x>420</x>
        <y>20</y>
        <width>113</width>
        <height>21</height>
@@ -71,7 +58,7 @@
     <widget class="QLabel" name="label_5">
      <property name="geometry">
       <rect>
-       <x>610</x>
+       <x>320</x>
        <y>20</y>
        <width>81</width>
        <height>16</height>
@@ -84,9 +71,9 @@
     <widget class="QCheckBox" name="checkbox_filter_invalidate_product">
      <property name="geometry">
       <rect>
-       <x>220</x>
+       <x>190</x>
        <y>20</y>
-       <width>151</width>
+       <width>111</width>
        <height>20</height>
       </rect>
      </property>
@@ -97,31 +84,59 @@
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QLabel" name="label_6">
-     <property name="geometry">
-      <rect>
-       <x>340</x>
-       <y>20</y>
-       <width>91</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>过滤重复产品</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="button_check_data">
      <property name="geometry">
       <rect>
-       <x>850</x>
+       <x>970</x>
        <y>20</y>
-       <width>91</width>
+       <width>71</width>
        <height>24</height>
       </rect>
      </property>
      <property name="text">
       <string>检查</string>
      </property>
+    </widget>
+    <widget class="QLineEdit" name="input_filter_field">
+     <property name="geometry">
+      <rect>
+       <x>780</x>
+       <y>20</y>
+       <width>151</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>sku</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="select_data_process_method">
+     <property name="geometry">
+      <rect>
+       <x>580</x>
+       <y>20</y>
+       <width>171</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <item>
+      <property name="text">
+       <string>不处理</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>过滤重复产品</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>合并重复产品</string>
+      </property>
+     </item>
     </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">

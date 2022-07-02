@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, create_engine, Integer, Text, DATETIME,Float
+from sqlalchemy import Column, String, create_engine, Integer, Text, DATETIME, Float
 from sqlalchemy.ext.declarative import declarative_base
 import re
 
@@ -45,20 +45,30 @@ class ProductDetail(Base):
     @property
     def gender(self):
         if self.category_name:
-            gender, cat_0, category_type = self.category_name.split('->')
+            category_names = self.category_name.split("|")
+            gender = category_names[0].split('->')[0]
             return gender
 
     @property
     def cat_0(self):
+        cat_0_set = set()
         if self.category_name:
-            gender, cat_0, category_type = self.category_name.split('->')
-            return cat_0
+            category_names = self.category_name.split("|")
+            for category in category_names:
+                cat_0 = category.split('->')[1]
+                cat_0_set.add(cat_0)
+
+            return "|".join(cat_0_set)
 
     @property
     def category_type(self):
+        category_type_set = set()
         if self.category_name:
-            gender, cat_0, category_type = self.category_name.split('->')
-            return category_type
+            category_names = self.category_name.split("|")
+            for category in category_names:
+                category_type = category.split('->')[2]
+                category_type_set.add(category_type)
+            return "|".join(category_type_set)
 
     def get_brand(self, default_brand=None):
         return self.brand or default_brand

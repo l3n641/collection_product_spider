@@ -22,3 +22,30 @@ def filter_empty_image(product_detail_data, image_path):
             continue
         new_product_detail_data.append(item)
     return new_product_detail_data, failed_image_sku
+
+
+def merge_product_category(product_detail_data: list, field: str):
+    """
+    根据指定字段合并产品分类
+    :param product_detail_data:
+    :param field:
+    :return:
+    """
+    new_product_detail_data = []
+    product_dict = {}
+    for product in product_detail_data:
+        key = getattr(product, field)
+        if key not in product_dict.keys():
+            product_dict[key] = []
+
+        product_dict[key].append(product)
+
+    for key in product_dict:
+        category_name_set = set()
+        for data in product_dict[key]:
+            category_name_set.add(data.category_name)
+
+        data.category_name = '|'.join(category_name_set)
+        new_product_detail_data.append(data)
+
+    return new_product_detail_data

@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBo
 from data_export_tools.views.ui_main_window import Ui_MainWindow
 from dotenv import load_dotenv
 from PySide6.QtCore import QDir
-from functions import get_sqlite_session
+from functions import get_sqlite_session, merge_product_category
 from spider.html_website_spider.libs.product_excel import ProductExcel
 from PySide6.QtGui import QTextCursor
 from spider.html_website_spider.models import ProductDetail, ProductUrl
@@ -85,13 +85,21 @@ class MainWindow(QMainWindow):
     def check_data(self):
         session = get_sqlite_session(self.database_file)
         query = session.query(ProductDetail)
-        field = self.main_view.input_repeat_quantity.text()
+        methods = self.main_view.select_data_process_method.currentIndex()
+        filter_filed = self.main_view.input_filter_field.text()
         filer_price = self.main_view.input_filter_min_price.text()
         is_filter_image = self.main_view.check_box_filter_image.isChecked()
-        if field:
-            query = query.group_by(getattr(ProductDetail, field))
-        if filer_price:
-            query = query.filter(ProductDetail.price >= filer_price)
+
+        if methods == 1 and filter_filed:
+            # 如果是过滤重复产品
+            query = query.group_by(getattr(ProductDetail, filter_filed))
+            if filer_price:
+                query = query.having(ProductDetail.price >= filer_price)
+
+        else:
+            if filer_price:
+                query = query.filter(ProductDetail.price >= filer_price)
+
         product_detail_datas = query.all()
 
         if is_filter_image:
@@ -101,6 +109,10 @@ class MainWindow(QMainWindow):
                 self.main_view.textarea_log.append(f"产品{item},下载图片失败")
 
             self.main_view.input_image_failed_quantity.setText(str(len(failed_image_sku_list)))
+
+        if methods == 2:
+            # 如果是合并产品
+            product_detail_datas = merge_product_category(product_detail_datas, filter_filed)
 
         self.main_view.input_validate_quantity.setText(str(len(product_detail_datas)))
         self.product_details = product_detail_datas
