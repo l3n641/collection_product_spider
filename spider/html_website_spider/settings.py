@@ -37,6 +37,9 @@ NEWSPIDER_MODULE = 'html_website_spider.spiders'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
 
+COOKIES_ENABLED = True  # 启用cookie
+#COOKIES_DEBUG = True
+
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
@@ -72,7 +75,7 @@ ROBOTSTXT_OBEY = False
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    'html_website_spider.middlewares.SimpleProxyMiddleware': 543,
+    #  'html_website_spider.middlewares.SimpleProxyMiddleware': 543,
 }
 
 # Enable or disable extensions
