@@ -8,6 +8,10 @@ from scrapy import signals
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+from scrapy.downloadermiddlewares.httpproxy import HttpProxyMiddleware
+from collections import defaultdict
+from urllib.request import _parse_proxy
+import random
 
 
 class HtmlWebsiteSpiderSpiderMiddleware:
@@ -104,13 +108,24 @@ class HtmlWebsiteSpiderDownloaderMiddleware:
         spider.logger.info('Spider opened: %s' % spider.name)
 
 
-class SimpleProxyMiddleware(object):
+class SimpleProxyMiddleware(HttpProxyMiddleware):
     def __init__(self, auth_encoding='latin-1'):
         self.auth_encoding = auth_encoding
-        http_proxy = os.getenv("HTTP_PROXY")
 
-        self.http_proxy = http_proxy
+        self.proxies = defaultdict(list)
+        proxy_file_path = os.getenv("PROXY_FILE_PATH")
+        if proxy_file_path and os.path.exists(proxy_file_path):
+            with open(proxy_file_path) as f:
+                proxy_list = f.readlines()
+                for proxy in proxy_list:
+                    proxy_type, *_ = _parse_proxy(proxy)
+                    scheme = proxy_type or os.getenv("DEFAULT_PROXY_SCHEME")
+
+                    url = proxy.strip()
+                    self.proxies[scheme].append(self._get_proxy(url, scheme))
 
     def _set_proxy(self, request, scheme):
-        if self.http_proxy:
-            request.meta['proxy'] = self.http_proxy
+        creds, proxy = random.choice(self.proxies[scheme])
+        request.meta['proxy'] = proxy
+        if creds:
+            request.headers['Proxy-Authorization'] = b'Basic ' + creds
