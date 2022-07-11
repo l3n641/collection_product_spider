@@ -11,6 +11,7 @@ from .models import ProductUrl, ProductDetail
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy import Request
 from .libs.sqlite import Sqlite
+from io import BytesIO
 
 
 class ProductUrlPipeline:
@@ -77,3 +78,24 @@ class ProductDetailPipeline(ImagesPipeline):
     def file_path(self, request, response=None, info=None, *, item=None):
         image_guid = request.meta.get("img_id")
         return f'{item.get("project_name")}/{item.get("sku")}/{image_guid}.jpg'
+
+    def convert_image(self, image, size=None):
+        if (image.format == 'PNG' or image.format == 'WEBP') and image.mode == 'RGBA':
+            background = self._Image.new('RGBA', image.size, (255, 255, 255))
+            background.paste(image, image)
+            image = background.convert('RGB')
+        elif image.mode == 'P':
+            image = image.convert("RGBA")
+            background = self._Image.new('RGBA', image.size, (255, 255, 255))
+            background.paste(image, image)
+            image = background.convert('RGB')
+        elif image.mode != 'RGB':
+            image = image.convert('RGB')
+
+        if size:
+            image = image.copy()
+            image.thumbnail(size, self._Image.ANTIALIAS)
+
+        buf = BytesIO()
+        image.save(buf, 'JPEG')
+        return image, buf
