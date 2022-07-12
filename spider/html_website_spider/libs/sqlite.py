@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
 import os
+import time
 
 
 class Sqlite(object):
@@ -19,8 +20,11 @@ class Sqlite(object):
         if not os.path.exists(db_dir_path):
             os.makedirs(db_dir_path)
 
-        db_path = os.path.join(db_dir_path, project_name)
-        engine = create_engine(f"sqlite:///{db_path}.db", echo=False, poolclass=StaticPool,
+        db_path = os.path.join(db_dir_path, project_name) + ".db"
+        if os.path.exists(db_path):
+            old_name = db_path + "_" + str(int(time.time()))
+            os.rename(db_path, old_name)
+        engine = create_engine(f"sqlite:///{db_path}", echo=False, poolclass=StaticPool,
                                connect_args={'check_same_thread': False})
         cls._engine = engine
         return engine
