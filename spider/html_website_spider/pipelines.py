@@ -7,7 +7,7 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 from .items import ProductUrlItem, ProductDetailItem
-from .models import ProductUrl, ProductDetail
+from .models import ProductUrl, ProductDetail, DownloadImageLog
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy import Request
 from .libs.sqlite import Sqlite
@@ -41,8 +41,33 @@ class ProductDetailPipeline(ImagesPipeline):
     def item_completed(self, results, item, info):
         if not isinstance(item, ProductDetailItem):
             return item
+        success_files = []
+        session = Sqlite.get_session()
+        image_paths = []
+        for status, detail in results:
+            if status:
+                success_files.append(detail.get("url"))
+                local_path = detail["path"]
+                image_paths.append(f'<img src="{local_path}"/>')
+                log = {
+                    "sku": item.get("sku"),
+                    "url": detail.get("url"),
+                    "status": 1,
+                    "local_path": local_path,
+                }
+                log_model = DownloadImageLog(**log)
+                session.add(log_model)
 
-        image_paths = [f'<img src="{x["path"]}"/>' for ok, x in results if ok]
+        # 记录下载失败的图片
+        for url in item.get("img", []):
+            if url not in success_files:
+                log = {
+                    "sku": item.get("sku"),
+                    "url": url,
+                    "status": 0,
+                }
+                log_model = DownloadImageLog(**log)
+                session.add(log_model)
 
         img = '|'.join(image_paths)
         size = '|'.join(item.get("size")) if item.get("size") else None
@@ -68,9 +93,8 @@ class ProductDetailPipeline(ImagesPipeline):
             "basc": item.get("basc"),
             "brand": item.get("brand"),
         }
-        model = ProductDetail(**data)
-        session = Sqlite.get_session()
 
+        model = ProductDetail(**data)
         session.add(model)
         session.commit()
         return item

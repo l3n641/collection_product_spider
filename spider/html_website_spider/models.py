@@ -72,3 +72,13 @@ class ProductDetail(Base):
 
     def get_brand(self, default_brand=None):
         return self.brand or default_brand
+
+
+class DownloadImageLog(Base):
+    __tablename__ = 'download_image_log'
+
+    id = Column(Integer, autoincrement=True, nullable=False, primary_key=True)
+    sku = Column(String(32))
+    url = Column(Text, nullable=False)
+    status = Column(Integer, nullable=False)
+    local_path = Column(Text)
