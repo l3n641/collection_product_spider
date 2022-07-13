@@ -18,7 +18,8 @@ class ProductExcel(object):
             for row in range(1, sheet.max_row + 1):
                 gender = self.column_name_filet(sheet.cell(row=row, column=gender_column).value, allow_nullable=True)
                 cat_0 = self.column_name_filet(sheet.cell(row=row, column=cat_0_column).value)
-                type_data = self.column_name_filet(sheet.cell(row=row, column=type_column).value)
+                type_data = self.column_name_filet(sheet.cell(row=row, column=type_column).value,
+                                                   allow_nullable=True) or ""
                 url = sheet.cell(row=row, column=url_column).value.strip()
                 category = f"{gender}->{cat_0}->{type_data}"
                 data[url] = category
