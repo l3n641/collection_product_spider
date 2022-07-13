@@ -32,40 +32,42 @@ class PullandbearSpider(CommonSpider):
             yield ProductUrlItem(**item_data)
             yield scrapy.Request(url=url, meta=response.meta, callback=self.parse_product_detail)
 
-    def parse_product_detail(self, response, **kwargs):
+    def parse_product_detail(self, response, ):
         data = response.json()
         product_id = data.get('id')
         description = data.get("detail").get('longDescription')
         title = data.get("name")
+        color_id = data.get("mainColorid")
+        bundle_product_summaries = data.get("bundleProductSummaries")[0]
+        detail = bundle_product_summaries.get("detail")
+        xmedia = detail.get('xmedia')
+        sku = f"{product_id}_{color_id}"
 
-        for item in data.get("bundleProductSummaries"):
-            detail = item.get("detail")
-            xmedia = detail.get('xmedia')
+        for item in detail.get("colors"):
+            if item.get("id") != color_id:
+                continue
+            size_list = []
+            price = None
+            for size in item.get("sizes"):
+                price = int(size.get("price")) / 100
+                size_list.append(size.get("name"))
 
-            for item in detail.get("colors"):
-                sku = f"{product_id}_{item.get('id')}"
-                size_list = []
-                price = None
-                for size in item.get("sizes"):
-                    price = int(size.get("price")) / 100
-                    size_list.append(size.get("name"))
-
-                images = self.get_img(item.get("id"), xmedia)
-                item_data = {
-                    "project_name": self.project_name,
-                    "PageUrl": response.url,
-                    "category_name": response.meta.get("category_name"),
-                    "sku": sku,
-                    "color": item.get("name"),
-                    "size": size_list,
-                    "img": images,
-                    "price": price,
-                    "title": title,
-                    "dade": datetime.now(),
-                    "basc": description,
-                    "brand": ""
-                }
-                yield ProductDetailItem(**item_data)
+            images = self.get_img(item.get("id"), xmedia)
+            item_data = {
+                "project_name": self.project_name,
+                "PageUrl": response.url,
+                "category_name": response.meta.get("category_name"),
+                "sku": sku,
+                "color": item.get("name"),
+                "size": size_list,
+                "img": images,
+                "price": price,
+                "title": title,
+                "dade": datetime.now(),
+                "basc": description,
+                "brand": ""
+            }
+            yield ProductDetailItem(**item_data)
 
     @staticmethod
     def get_img(color_code: str, media: list):
