@@ -15,13 +15,31 @@ def get_sqlite_session(database_file_name):
 def filter_empty_image(product_detail_data, image_path):
     new_product_detail_data = []
     failed_image_sku = []
+    failed_first_image_sku = []
+    error_sku_img = []
     for item in product_detail_data:
         image_dir = os.path.join(image_path, item.sku)
         if not os.path.exists(image_dir):
             failed_image_sku.append(item.sku)
             continue
+        if not os.path.exists(os.path.join(image_dir, '1.jpg')):
+            failed_first_image_sku.append(item.sku)
+            failed_image_sku.append(item.sku)
+            continue
+        images = item.img.split("|")
+        for image in images:
+            if item.sku not in image:
+                error_sku_img.append(item.sku)
+                failed_image_sku.append(item.sku)
+                break
+
         new_product_detail_data.append(item)
-    return new_product_detail_data, failed_image_sku
+        failed_image_info = {
+            "failed_image_sku": failed_image_sku,
+            "failed_first_image_sku": failed_first_image_sku,
+            "error_sku_img": error_sku_img,
+        }
+    return new_product_detail_data, failed_image_info
 
 
 def merge_product_category(product_detail_data: list, field: str):

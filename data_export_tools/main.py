@@ -1,4 +1,5 @@
 # This Python file uses the following encoding: utf-8
+import datetime
 import os
 from pathlib import Path
 import sys
@@ -83,6 +84,9 @@ class MainWindow(QMainWindow):
         self.main_view.textarea_log.append(f"实际爬取基础链接数:{spider_base_url_quantity}")
 
     def check_data(self):
+        self.main_view.textarea_log.moveCursor(QTextCursor.End)
+        self.main_view.textarea_log.append("开始检测产品，请等待")
+
         session = get_sqlite_session(self.database_file)
         query = session.query(ProductDetail)
         methods = self.main_view.select_data_process_method.currentIndex()
@@ -103,13 +107,24 @@ class MainWindow(QMainWindow):
         product_detail_datas = query.all()
 
         if is_filter_image:
-            product_detail_datas, failed_image_sku_list = filter_empty_image(product_detail_datas, self.image_dir)
-            for item in failed_image_sku_list:
+            product_detail_datas, failed_image_info = filter_empty_image(product_detail_datas, self.image_dir)
+
+            for item in failed_image_info.get("failed_image_sku"):
                 self.main_view.textarea_log.moveCursor(QTextCursor.End)
-                self.main_view.textarea_log.append(f"产品{item},下载图片失败")
+                self.main_view.textarea_log.append(f"{item},下载图片失败")
 
-            self.main_view.input_image_failed_quantity.setText(str(len(failed_image_sku_list)))
+            for item in failed_image_info.get("failed_first_image_sku"):
+                self.main_view.textarea_log.moveCursor(QTextCursor.End)
+                self.main_view.textarea_log.append(f"{item},首图下载失败")
 
+            for item in failed_image_info.get("error_sku_img"):
+                self.main_view.textarea_log.moveCursor(QTextCursor.End)
+                self.main_view.textarea_log.append(f"{item},图片和sku不一致")
+            failed_total = len(failed_image_info.get("failed_image_sku")) + len(
+                failed_image_info.get("failed_first_image_sku")) + len(failed_image_info.get("error_sku_img"))
+            self.main_view.input_image_failed_quantity.setText(str(failed_total))
+            self.main_view.textarea_log.moveCursor(QTextCursor.End)
+            self.main_view.textarea_log.append(f"检测完成，可以导出产品：{datetime.datetime.now()}")
         if methods == 2:
             # 如果是合并产品
             product_detail_datas = merge_product_category(product_detail_datas, filter_filed)
