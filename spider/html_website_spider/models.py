@@ -10,7 +10,7 @@ class ProductUrl(Base):
     __tablename__ = 'product_urls'
 
     id = Column(Integer, autoincrement=True, nullable=False, primary_key=True)
-    url = Column(String(1024), nullable=False)
+    url = Column(String(1024), nullable=False, index=True)
     category_name = Column(String(128), nullable=False)
     referer = Column(String(1024), nullable=False, comment="从哪个地址下载")
 
@@ -19,7 +19,8 @@ class ProductDetail(Base):
     __tablename__ = 'product_detail'
 
     id = Column(Integer, autoincrement=True, nullable=False, primary_key=True)
-    PageUrl = Column(Text, nullable=False)
+    PageUrl = Column(Text, nullable=False, index=True)
+    html_url = Column(Text)
     category_name = Column(String(128))
     sku = Column(String(32))
     color = Column(Text)

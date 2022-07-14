@@ -82,6 +82,7 @@ class ProductDetailPipeline(ImagesPipeline):
 
         data = {
             "PageUrl": item.get("PageUrl"),
+            "html_url": item.get("html_url"),
             "category_name": item.get("category_name"),
             "sku": item.get("sku"),
             "color": item.get("color"),

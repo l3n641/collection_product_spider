@@ -15,6 +15,7 @@ class ProductUrlItem(scrapy.Item):
 class ProductDetailItem(scrapy.Item):
     project_name = scrapy.Field()
     PageUrl = scrapy.Field()
+    html_url = scrapy.Field()
     category_name = scrapy.Field()
     sku = scrapy.Field()
     color = scrapy.Field()
