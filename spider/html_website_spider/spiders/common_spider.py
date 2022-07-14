@@ -8,6 +8,7 @@ import scrapy
 
 class CommonSpider(scrapy.Spider):
     project_name = None
+    check_lang = True
 
     def __init__(self, category_file=None, *args, **kwargs):
 
@@ -20,6 +21,9 @@ class CommonSpider(scrapy.Spider):
             raise ValueError("产品类别文件不存在")
 
         file = ProductExcel(category_file_path)
+        if self.check_lang and self.name.endswith(file.lange):
+            raise ValueError("任务文件和爬虫语言不匹配")
+
         product_category = file.get_category()
         self.product_category = product_category
         self.project_name = file.project_name
