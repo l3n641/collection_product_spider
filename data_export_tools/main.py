@@ -77,11 +77,36 @@ class MainWindow(QMainWindow):
 
         self.main_view.textarea_log.moveCursor(QTextCursor.End)
         self.main_view.textarea_log.append("加载成功")
-        category_list = file.get_category()
-        self.main_view.textarea_log.append(f"excel 包含链接数:{len(category_list)}")
+        categories = file.get_category()
+        self.main_view.textarea_log.append(f"excel 包含链接数:{len(categories)}")
 
         spider_base_url_quantity, *_ = session.query(func.count(distinct(ProductUrl.referer))).first()
         self.main_view.textarea_log.append(f"实际爬取基础链接数:{spider_base_url_quantity}")
+        not_spider_categories = self.get_not_spider_category(categories, session)
+        for record in not_spider_categories:
+            self.main_view.textarea_log.append(f"没有爬取的分类:{record.get('category')} : {record.get('url')}")
+
+    @staticmethod
+    def get_not_spider_category(categories, session):
+        """
+        获取没有爬取到的产品分类
+        :param categories:
+        :param session:
+        :return:
+        """
+        spider_category_urls = session.query(distinct(ProductUrl.referer)).all()
+
+        not_spider_urls = []
+        for url in categories.keys():
+            state = False
+            for spider_url, *_ in spider_category_urls:
+                if url.startswith(spider_url):
+                    state = True
+                    break
+            if not state:
+                not_spider_urls.append({"category": categories.get(url), "url": url})
+
+        return not_spider_urls
 
     def check_data(self):
         self.main_view.textarea_log.moveCursor(QTextCursor.End)
