@@ -13,6 +13,7 @@ class ProductUrl(Base):
     url = Column(String(1024), nullable=False, index=True)
     category_name = Column(String(128), nullable=False)
     referer = Column(String(1024), nullable=False, comment="从哪个地址下载")
+    status = Column(Integer, nullable=False, server_default="0", comment="下载状态,0-还没下载，1-已经下载")
 
 
 class ProductDetail(Base):

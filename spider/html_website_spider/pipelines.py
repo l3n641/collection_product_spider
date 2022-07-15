@@ -97,6 +97,7 @@ class ProductDetailPipeline(ImagesPipeline):
 
         model = ProductDetail(**data)
         session.add(model)
+        session.query(ProductUrl).filter(ProductUrl.url == item.get("PageUrl")).update({"status": 1})
         session.commit()
         return item
 

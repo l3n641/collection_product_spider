@@ -1,16 +1,17 @@
 from ..libs.product_excel import ProductExcel
-from ..models import Base
+from ..models import Base, ProductUrl
 from ..libs.sqlite import Sqlite
 from scrapy.utils.project import get_project_settings
 import os
 import scrapy
+from ..items import ProductUrlItem, ProductDetailItem
 
 
 class CommonSpider(scrapy.Spider):
     project_name = None
     check_lang = True
 
-    def __init__(self, category_file=None, *args, **kwargs):
+    def __init__(self, category_file=None, is_continue=True, *args, **kwargs):
 
         super(CommonSpider).__init__(*args, **kwargs)
 
@@ -31,6 +32,11 @@ class CommonSpider(scrapy.Spider):
         product_category = file.get_category()
         self.product_category = product_category
         self.project_name = file.project_name
+        self.is_continue = is_continue
+
+        if not is_continue:
+            # 重头开始下载内容
+            Sqlite.rename_old_database(file.project_name, project_settings.get("DB_DIR_PATH"))
 
         db_engine = Sqlite.get_sqlite_engine(file.project_name, project_settings.get("DB_DIR_PATH"))
         Sqlite.set_session_class(db_engine)
@@ -44,8 +50,35 @@ class CommonSpider(scrapy.Spider):
                 "referer": url,
 
             }
-            yield scrapy.Request(url, meta=meta, callback=self.parse_product_list, errback=self.start_request_error)
+            yield scrapy.Request(url, meta=meta, callback=self.parse_product_list, errback=self.start_request_error,
+                                 dont_filter=True)
 
     @staticmethod
     def start_request_error(failure):
         print(f"excel 链接无效:{failure.request.url}")
+
+    def request_product_detail(self, detail_url, category_name, referer, **kwargs):
+        """
+        请求详情页面
+        :param detail_url:
+        :param category_name:
+        :param referer:
+        :param kwargs:
+        :return:
+        """
+        # 如果开启断点续传就从数据库获取数据后判断
+        if self.is_continue:
+            session = Sqlite.get_session()
+            data = session.query(ProductUrl).filter(ProductUrl.url == detail_url,
+                                                    ProductUrl.category_name == category_name,
+                                                    ProductUrl.status == 1).first()
+            if data:
+                return False
+
+        item_data = {
+            "category_name": category_name,
+            "url": detail_url,
+            "referer": referer,
+        }
+        yield ProductUrlItem(**item_data)
+        yield scrapy.Request(detail_url, **kwargs)
