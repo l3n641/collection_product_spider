@@ -11,7 +11,7 @@ class CommonSpider(scrapy.Spider):
     project_name = None
     check_lang = True
 
-    def __init__(self, category_file=None, is_continue=True, *args, **kwargs):
+    def __init__(self, category_file=None, is_continue=True, start_by_failed=False, *args, **kwargs):
 
         super(CommonSpider).__init__(*args, **kwargs)
 
@@ -33,6 +33,7 @@ class CommonSpider(scrapy.Spider):
         self.product_category = product_category
         self.project_name = file.project_name
         self.is_continue = is_continue
+        self.start_by_failed = start_by_failed
 
         if not is_continue:
             # 重头开始下载内容
@@ -43,6 +44,18 @@ class CommonSpider(scrapy.Spider):
         Base.metadata.create_all(db_engine)
 
     def start_requests(self):
+        if self.start_by_failed:
+            for task in self.start_by_database():
+                yield task
+        else:
+            for task in self.start_by_product_category():
+                yield task
+
+    def start_by_product_category(self):
+        """
+        从产品分类里爬取数据
+        :return:
+        """
         product_category = self.product_category
         for url in product_category.keys():
             meta = {
@@ -53,16 +66,57 @@ class CommonSpider(scrapy.Spider):
             yield scrapy.Request(url, meta=meta, callback=self.parse_product_list, errback=self.start_request_error,
                                  dont_filter=True)
 
+    def start_by_database(self):
+        """
+        从数据失败记录里开始
+        :return:
+        """
+        data = self.get_failed_detail_urls()
+        for item in data:
+            request_data = self.get_failed_quest_data(item)
+            yield scrapy.Request(**request_data)
+
+    def get_failed_quest_data(self, item: ProductUrl, **kwargs):
+        """
+        获取重新下载失败的详情页面的参数
+        :param item:
+        :param kwargs:
+        :return:
+        """
+        meta = {
+            "category_name": item.category_name,
+            "referer": item.referer,
+
+        }
+        item_data = {
+            "url": item.url,
+            "meta": meta,
+            "callback": self.parse_product_detail,
+        }
+        item_data.update(kwargs)
+        return item_data
+
+    @staticmethod
+    def get_failed_detail_urls():
+        """
+        获取失败的详情链接
+        :return: [ProductUrl]
+        """
+        session = Sqlite.get_session()
+        data = session.query(ProductUrl).filter(ProductUrl.status == 0).all()
+        return data
+
     @staticmethod
     def start_request_error(failure):
         print(f"excel 链接无效:{failure.request.url}")
 
-    def request_product_detail(self, detail_url, category_name, referer, **kwargs):
+    def request_product_detail(self, detail_url, category_name, referer, page_url, **kwargs):
         """
         请求详情页面
         :param detail_url:
         :param category_name:
         :param referer:
+        :param page_url:
         :param kwargs:
         :return:
         """
@@ -79,6 +133,8 @@ class CommonSpider(scrapy.Spider):
             "category_name": category_name,
             "url": detail_url,
             "referer": referer,
+            "status": 0,
+            "page_url": page_url,
         }
         yield ProductUrlItem(**item_data)
         yield scrapy.Request(detail_url, **kwargs)

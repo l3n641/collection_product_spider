@@ -4,3 +4,6 @@
 # your spiders.
 
 from ..items import ProductUrlItem, ProductDetailItem
+from ..libs.product_excel import ProductExcel
+from ..models import Base, ProductUrl
+from ..libs.sqlite import Sqlite

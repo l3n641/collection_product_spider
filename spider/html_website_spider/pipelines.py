@@ -21,8 +21,14 @@ class ProductUrlPipeline:
             return item
 
         session = Sqlite.get_session()
-
-        model = ProductUrl(url=item.get("url"), category_name=item.get("category_name"), referer=item.get("referer"))
+        data = {
+            "url": item.get("url"),
+            "category_name": item.get("category_name"),
+            "referer": item.get("referer"),
+            "page_url": item.get("page_url"),
+            "status": item.get("status"),
+        }
+        model = ProductUrl(**data)
         session.add(model)
         session.commit()
 
