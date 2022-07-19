@@ -85,3 +85,11 @@ class DownloadImageLog(Base):
     url = Column(Text, nullable=False)
     status = Column(Integer, nullable=False)
     local_path = Column(Text)
+
+
+class FailedCategory(Base):
+    __tablename__ = 'failed_category'
+
+    id = Column(Integer, autoincrement=True, nullable=False, primary_key=True)
+    category_name = Column(String(128))
+    url = Column(String(1024), nullable=False, index=True, comment="失败链接")

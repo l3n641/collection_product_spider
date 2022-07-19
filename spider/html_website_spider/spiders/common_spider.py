@@ -1,5 +1,5 @@
 from ..libs.product_excel import ProductExcel
-from ..models import Base, ProductUrl
+from ..models import Base, ProductUrl, FailedCategory
 from ..libs.sqlite import Sqlite
 from scrapy.utils.project import get_project_settings
 import os
@@ -108,6 +108,14 @@ class CommonSpider(scrapy.Spider):
 
     @staticmethod
     def start_request_error(failure):
+        session = Sqlite.get_session()
+        data = {
+            'url': failure.request.meta.get("referer"),
+            'category_name': failure.request.meta.get("category_name"),
+        }
+        log = FailedCategory(**data)
+        session.add(log)
+        session.commit()
         print(f"excel 链接无效:{failure.request.url}")
 
     def request_product_detail(self, detail_url, category_name, referer, page_url, **kwargs):
@@ -121,20 +129,21 @@ class CommonSpider(scrapy.Spider):
         :return:
         """
         # 如果开启断点续传就从数据库获取数据后判断
+        data = None  # 数据库记录
         if self.is_continue:
             session = Sqlite.get_session()
             data = session.query(ProductUrl).filter(ProductUrl.url == detail_url,
-                                                    ProductUrl.category_name == category_name,
-                                                    ProductUrl.status == 1).first()
-            if data:
+                                                    ProductUrl.category_name == category_name).first()
+            if data and data.status == 1:
                 return False
 
-        item_data = {
-            "category_name": category_name,
-            "url": detail_url,
-            "referer": referer,
-            "status": 0,
-            "page_url": page_url,
-        }
-        yield ProductUrlItem(**item_data)
+        if not data:
+            item_data = {
+                "category_name": category_name,
+                "url": detail_url,
+                "referer": referer,
+                "status": 0,
+                "page_url": page_url,
+            }
+            yield ProductUrlItem(**item_data)
         yield scrapy.Request(detail_url, **kwargs)

@@ -5,5 +5,5 @@
 
 from ..items import ProductUrlItem, ProductDetailItem
 from ..libs.product_excel import ProductExcel
-from ..models import Base, ProductUrl
+from ..models import Base, ProductUrl, FailedCategory
 from ..libs.sqlite import Sqlite
