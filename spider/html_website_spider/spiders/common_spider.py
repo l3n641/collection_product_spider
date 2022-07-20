@@ -14,6 +14,7 @@ class CommonSpider(scrapy.Spider):
     def __init__(self, category_file=None, is_continue=True, start_by_failed=False, *args, **kwargs):
 
         super(CommonSpider).__init__(*args, **kwargs)
+        is_continue = int(is_continue)
 
         project_settings = get_project_settings()
         category_file_path = os.path.join(project_settings.get("PROJECT_STORE"), category_file)
