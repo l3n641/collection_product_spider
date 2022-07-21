@@ -14,6 +14,7 @@ from PySide6.QtGui import QTextCursor
 from spider.html_website_spider.models import ProductDetail, ProductUrl
 from functions import filter_empty_image
 from size_guide import SizeGuide
+from server import DatabaseSqlite
 
 
 class MainWindow(QMainWindow):
@@ -35,8 +36,14 @@ class MainWindow(QMainWindow):
         self.main_view.combo_box_category.currentTextChanged.connect(self.set_category_to_category_size_input)
         self.main_view.combobox_category_name.currentTextChanged.connect(self.set_category_to_old_category_input)
         self.main_view.button_upate_category_name.clicked.connect(self.update_category_name)
+        self.main_view.button_clear_log.clicked.connect(self.clear_log)
+        self.main_view.button_merge_product_category.clicked.connect(self.merge_product_category)
 
     def load_project_file(self):
+        """
+        加载项目数据
+        :return:
+        """
         project_path = os.getenv("PROJECT_STORE", QDir.currentPath())
         file_path, _ = QFileDialog.getOpenFileName(self, "请选择文件", project_path, "产品类目(*.xlsx)")
         if not file_path:
@@ -70,89 +77,59 @@ class MainWindow(QMainWindow):
         self.image_dir = image_dir
         self.main_view.label_project_file.setText(file_path)
 
-        session = get_sqlite_session(database_file)
-        product_details = session.query(ProductDetail).all()
+        db_server = DatabaseSqlite(database_file)
+        product_details = db_server.get_product_detail_all()
+
         self.product_details = product_details
         self.main_view.input_total_quantity.setText(str(len(product_details)))
-
-        self.main_view.textarea_log.moveCursor(QTextCursor.End)
-        self.main_view.textarea_log.append("加载成功")
+        spider_base_url_quantity = db_server.get_spider_category_amount()
         categories = file.get_category()
-        self.main_view.textarea_log.append(f"excel 包含链接数:{len(categories)}")
 
-        spider_base_url_quantity, *_ = session.query(func.count(distinct(ProductUrl.referer))).first()
+        self.main_view.textarea_log.clear()
+        self.main_view.textarea_log.append("加载成功")
+        self.main_view.textarea_log.append(f"excel 包含链接数:{len(categories)}")
         self.main_view.textarea_log.append(f"实际爬取基础链接数:{spider_base_url_quantity}")
-        not_spider_categories = self.get_not_spider_category(categories, session)
+
+        not_spider_categories = db_server.get_not_spider_category(categories)
         for record in not_spider_categories:
             self.main_view.textarea_log.append(f"没有爬取的分类:{record.get('category')} : {record.get('url')}")
 
-    @staticmethod
-    def get_not_spider_category(categories, session):
-        """
-        获取没有爬取到的产品分类
-        :param categories:
-        :param session:
-        :return:
-        """
-        spider_category_urls = session.query(distinct(ProductUrl.referer)).all()
+    def merge_product_category(self):
+        db_server = DatabaseSqlite(self.database_file)
+        self.product_details = db_server.update_product_category(self.product_details)
+        self.main_view.textarea_log.append("合并产品分类成功")
 
-        not_spider_urls = []
-        for url in categories.keys():
-            state = False
-            for spider_url, *_ in spider_category_urls:
-                if url.startswith(spider_url):
-                    state = True
-                    break
-            if not state:
-                not_spider_urls.append({"category": categories.get(url), "url": url})
-
-        return not_spider_urls
+    def clear_log(self):
+        self.main_view.textarea_log.clear()
 
     def check_data(self):
         self.main_view.textarea_log.moveCursor(QTextCursor.End)
         self.main_view.textarea_log.append("开始检测产品，请等待")
-
-        session = get_sqlite_session(self.database_file)
-        query = session.query(ProductDetail)
-        methods = self.main_view.select_data_process_method.currentIndex()
-        filter_filed = self.main_view.input_filter_field.text()
+        filter_filed = None
+        if self.main_view.checkbox_filter_repeat_sku_product.isChecked():
+            filter_filed = 'sku'
         filer_price = self.main_view.input_filter_min_price.text()
         is_filter_image = self.main_view.check_box_filter_image.isChecked()
 
-        if methods == 1 and filter_filed:
-            # 如果是过滤重复产品
-            query = query.group_by(getattr(ProductDetail, filter_filed))
-            if filer_price:
-                query = query.having(ProductDetail.price >= filer_price)
-
-        else:
-            if filer_price:
-                query = query.filter(ProductDetail.price >= filer_price)
-
-        product_detail_datas = query.all()
+        db_server = DatabaseSqlite(self.database_file)
+        product_detail_datas = db_server.get_product_detail_all(filter_filed, filer_price)
 
         if is_filter_image:
             product_detail_datas, failed_image_info = filter_empty_image(product_detail_datas, self.image_dir)
 
             for item in failed_image_info.get("failed_image_sku"):
-                self.main_view.textarea_log.moveCursor(QTextCursor.End)
                 self.main_view.textarea_log.append(f"{item},下载图片失败")
 
             for item in failed_image_info.get("failed_first_image_sku"):
-                self.main_view.textarea_log.moveCursor(QTextCursor.End)
                 self.main_view.textarea_log.append(f"{item},首图下载失败")
 
             for item in failed_image_info.get("error_sku_img"):
-                self.main_view.textarea_log.moveCursor(QTextCursor.End)
                 self.main_view.textarea_log.append(f"{item},图片和sku不一致")
             failed_total = len(failed_image_info.get("failed_image_sku")) + len(
                 failed_image_info.get("failed_first_image_sku")) + len(failed_image_info.get("error_sku_img"))
             self.main_view.input_image_failed_quantity.setText(str(failed_total))
             self.main_view.textarea_log.moveCursor(QTextCursor.End)
             self.main_view.textarea_log.append(f"检测完成，可以导出产品：{datetime.datetime.now()}")
-        if methods == 2:
-            # 如果是合并产品
-            product_detail_datas = merge_product_category(product_detail_datas, filter_filed)
 
         self.main_view.input_validate_quantity.setText(str(len(product_detail_datas)))
         self.product_details = product_detail_datas
