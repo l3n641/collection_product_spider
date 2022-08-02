@@ -119,6 +119,13 @@ class CommonSpider(scrapy.Spider):
         session.commit()
         print(f"excel 链接无效:{failure.request.url}")
 
+    @staticmethod
+    def get_product_log(detail_url, category_name):
+        session = Sqlite.get_session()
+        data = session.query(ProductUrl).filter(ProductUrl.url == detail_url,
+                                                ProductUrl.category_name == category_name).first()
+        return data
+
     def request_product_detail(self, detail_url, category_name, referer, page_url, **kwargs):
         """
         请求详情页面
@@ -132,9 +139,7 @@ class CommonSpider(scrapy.Spider):
         # 如果开启断点续传就从数据库获取数据后判断
         data = None  # 数据库记录
         if self.is_continue:
-            session = Sqlite.get_session()
-            data = session.query(ProductUrl).filter(ProductUrl.url == detail_url,
-                                                    ProductUrl.category_name == category_name).first()
+            data = self.get_product_log(detail_url, category_name)
             if data and data.status == 1:
                 return False
 

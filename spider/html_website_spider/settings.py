@@ -121,4 +121,4 @@ DB_DIR_PATH = db_store
 
 
 # 默认: 'DEBUG'，log的最低级别
-LOG_LEVEL = "WARNING"
+#LOG_LEVEL = "WARNING"
