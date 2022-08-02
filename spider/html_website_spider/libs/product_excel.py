@@ -115,7 +115,7 @@ class ProductExcel(object):
                     product.price,
                     "", "", "", "", "", "", "", "",
                     product.dade,
-                    product.PageUrl, ]
+                    product.html_url, ]
                 for i in range(len(columns)):
                     sheet.cell(row=row, column=i + 1).value = data[i]
                 row = row + 1
