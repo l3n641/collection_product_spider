@@ -15,6 +15,7 @@ from spider.html_website_spider.models import ProductDetail, ProductUrl
 from functions import filter_empty_image
 from size_guide import SizeGuide
 from server import DatabaseSqlite
+from pre_product import PreProductExcel
 
 
 class MainWindow(QMainWindow):
@@ -27,6 +28,7 @@ class MainWindow(QMainWindow):
         self.default_brand = None
         self.product_file = None
         self.product_details = []
+        self.category_data = None
         self.main_view.button_load_project.clicked.connect(self.load_project_file)
         self.main_view.button_check_data.clicked.connect(self.check_data)
         self.main_view.button_set_default_brand.clicked.connect(self.set_default_brand)
@@ -38,6 +40,7 @@ class MainWindow(QMainWindow):
         self.main_view.button_upate_category_name.clicked.connect(self.update_category_name)
         self.main_view.button_clear_log.clicked.connect(self.clear_log)
         self.main_view.button_merge_product_category.clicked.connect(self.merge_product_category)
+        self.main_view.button_update_pre_product_category.clicked.connect(self.update_pre_product_category)
 
     def load_project_file(self):
         """
@@ -66,6 +69,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "错误", "加载文件失败", QMessageBox.Yes, QMessageBox.Yes)
             return False
 
+        self.category_data = category_data
         for url in category_data:
             self.main_view.combo_box_category.addItem(category_data.get(url))
             self.main_view.combobox_category_name.addItem(category_data.get(url))
@@ -185,6 +189,30 @@ class MainWindow(QMainWindow):
                 row = row + 1
 
         self.main_view.textarea_log.append(f"类别:{category},更新尺码{new_size}，更新数量{row}")
+
+    def update_pre_product_category(self):
+        if not self.category_data:
+            QMessageBox.critical(self, "错误", "请先加载产品初始文件", QMessageBox.Yes, QMessageBox.Yes)
+            return False
+
+        category_list = []
+        for url in self.category_data:
+            category_list.append(self.category_data.get(url).strip())
+
+        project_path = os.getenv("PROJECT_STORE", QDir.currentPath())
+        file_path, _ = QFileDialog.getOpenFileName(self, "请选择文件", project_path, "预处理产品文件(*.xlsx)")
+        if not file_path:
+            return
+
+        pre_product_excel = PreProductExcel(file_path)
+        save_dir = os.path.dirname(self.product_file.path)
+        export_dir = os.path.join(save_dir, "pre_product")
+        if not os.path.exists(export_dir):
+            os.makedirs(export_dir)
+        file_name = os.path.basename(file_path)
+        export_path = os.path.join(export_dir, file_name)
+        pre_product_excel.update_product_category(category_list, export_path=export_path)
+        QMessageBox.information(self, "信息", "导出完成", QMessageBox.Yes)
 
 
 if __name__ == "__main__":

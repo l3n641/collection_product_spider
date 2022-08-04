@@ -276,6 +276,16 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QWidget()
         self.tab_2.setObjectName(u"tab_2")
+        self.gridLayout_10 = QGridLayout(self.tab_2)
+        self.gridLayout_10.setObjectName(u"gridLayout_10")
+        self.groupBox_8 = QGroupBox(self.tab_2)
+        self.groupBox_8.setObjectName(u"groupBox_8")
+        self.button_update_pre_product_category = QPushButton(self.groupBox_8)
+        self.button_update_pre_product_category.setObjectName(u"button_update_pre_product_category")
+        self.button_update_pre_product_category.setGeometry(QRect(20, 30, 131, 24))
+
+        self.gridLayout_10.addWidget(self.groupBox_8, 0, 0, 1, 1)
+
         self.tabWidget.addTab(self.tab_2, "")
 
         self.gridLayout_6.addWidget(self.tabWidget, 0, 0, 1, 1)
@@ -329,6 +339,8 @@ class Ui_MainWindow(object):
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"\u5c3a\u7801\u6a21\u677f", None))
         self.button_update_size.setText(QCoreApplication.translate("MainWindow", u"\u4fee\u6539", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"\u64cd\u4f5c", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"\u6570\u636e\u663e\u793a", None))
+        self.groupBox_8.setTitle(QCoreApplication.translate("MainWindow", u"\u5de5\u5177", None))
+        self.button_update_pre_product_category.setText(QCoreApplication.translate("MainWindow", u"\u66f4\u65b0\u9884\u5904\u7406\u4ea7\u54c1\u5206\u7c7b", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"\u4e8c\u6b21\u5904\u7406", None))
     # retranslateUi
 

@@ -336,8 +336,30 @@
       </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
-        <string>数据显示</string>
+        <string>二次处理</string>
        </attribute>
+       <layout class="QGridLayout" name="gridLayout_10">
+        <item row="0" column="0">
+         <widget class="QGroupBox" name="groupBox_8">
+          <property name="title">
+           <string>工具</string>
+          </property>
+          <widget class="QPushButton" name="button_update_pre_product_category">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>30</y>
+             <width>131</width>
+             <height>24</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>更新预处理产品分类</string>
+           </property>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
