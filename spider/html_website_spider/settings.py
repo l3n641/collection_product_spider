@@ -37,6 +37,9 @@ NEWSPIDER_MODULE = 'html_website_spider.spiders'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
 
+COOKIES_ENABLED = True  # 启用cookie
+#COOKIES_DEBUG = True
+
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
@@ -71,9 +74,9 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    'html_website_spider.middlewares.HtmlWebsiteSpiderDownloaderMiddleware': 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+      'html_website_spider.middlewares.SimpleProxyMiddleware': 543,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -118,4 +121,4 @@ DB_DIR_PATH = db_store
 
 
 # 默认: 'DEBUG'，log的最低级别
-LOG_LEVEL = "WARNING"
+#LOG_LEVEL = "WARNING"

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, create_engine, Integer, Text, DATETIME,Float
+from sqlalchemy import Column, String, create_engine, Integer, Text, DATETIME, Float
 from sqlalchemy.ext.declarative import declarative_base
 import re
 
@@ -10,16 +10,19 @@ class ProductUrl(Base):
     __tablename__ = 'product_urls'
 
     id = Column(Integer, autoincrement=True, nullable=False, primary_key=True)
-    url = Column(String(1024), nullable=False)
+    url = Column(String(1024), nullable=False, index=True, comment="详情页链接")
     category_name = Column(String(128), nullable=False)
-    referer = Column(String(1024), nullable=False, comment="从哪个地址下载")
+    referer = Column(String(1024), nullable=False, comment="产品分类链接")
+    page_url = Column(Text, comment="获取详情链接的页面url")
+    status = Column(Integer, nullable=False, server_default="0", comment="下载状态,0-还没下载，1-已经下载")
 
 
 class ProductDetail(Base):
     __tablename__ = 'product_detail'
 
     id = Column(Integer, autoincrement=True, nullable=False, primary_key=True)
-    PageUrl = Column(Text, nullable=False)
+    PageUrl = Column(Text, nullable=False, index=True)
+    html_url = Column(Text)
     category_name = Column(String(128))
     sku = Column(String(32))
     color = Column(Text)
@@ -45,20 +48,48 @@ class ProductDetail(Base):
     @property
     def gender(self):
         if self.category_name:
-            gender, cat_0, category_type = self.category_name.split('->')
+            category_names = self.category_name.split("|")
+            gender = category_names[0].split('->')[0]
             return gender
 
     @property
     def cat_0(self):
+        cat_0_set = set()
         if self.category_name:
-            gender, cat_0, category_type = self.category_name.split('->')
-            return cat_0
+            category_names = self.category_name.split("|")
+            for category in category_names:
+                cat_0 = category.split('->')[1]
+                cat_0_set.add(cat_0)
+
+            return "|".join(cat_0_set)
 
     @property
     def category_type(self):
+        category_type_set = set()
         if self.category_name:
-            gender, cat_0, category_type = self.category_name.split('->')
-            return category_type
+            category_names = self.category_name.split("|")
+            for category in category_names:
+                category_type = category.split('->')[2]
+                category_type_set.add(category_type)
+            return "|".join(category_type_set)
 
     def get_brand(self, default_brand=None):
         return self.brand or default_brand
+
+
+class DownloadImageLog(Base):
+    __tablename__ = 'download_image_log'
+
+    id = Column(Integer, autoincrement=True, nullable=False, primary_key=True)
+    sku = Column(String(32))
+    url = Column(Text, nullable=False)
+    status = Column(Integer, nullable=False)
+    local_path = Column(Text)
+
+
+class FailedCategory(Base):
+    __tablename__ = 'failed_category'
+
+    id = Column(Integer, autoincrement=True, nullable=False, primary_key=True)
+    category_name = Column(String(128))
+    url = Column(String(1024), nullable=False, index=True, comment="失败链接")

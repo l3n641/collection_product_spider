@@ -16,10 +16,10 @@ class ProductExcel(object):
             sheet = workbook[sheet_name]
             data = {}
             for row in range(1, sheet.max_row + 1):
-                gender = sheet.cell(row=row, column=gender_column).value
-                gender = gender.strip().title() if gender else ""
-                cat_0 = sheet.cell(row=row, column=cat_0_column).value.strip().title()
-                type_data = sheet.cell(row=row, column=type_column).value.strip().title()
+                gender = self.column_name_filet(sheet.cell(row=row, column=gender_column).value, allow_nullable=True)
+                cat_0 = self.column_name_filet(sheet.cell(row=row, column=cat_0_column).value)
+                type_data = self.column_name_filet(sheet.cell(row=row, column=type_column).value,
+                                                   allow_nullable=True) or ""
                 url = sheet.cell(row=row, column=url_column).value.strip()
                 category = f"{gender}->{cat_0}->{type_data}"
                 data[url] = category
@@ -84,7 +84,6 @@ class ProductExcel(object):
             for product in product_detail_data:
                 if not product.featured_image or not product.title:
                     continue
-                size = "|".join(set(product.size.split("|"))) if product.size else None
                 size = ''
                 if product.size:
                     size_set = []
@@ -116,7 +115,7 @@ class ProductExcel(object):
                     product.price,
                     "", "", "", "", "", "", "", "",
                     product.dade,
-                    product.PageUrl, ]
+                    product.html_url, ]
                 for i in range(len(columns)):
                     sheet.cell(row=row, column=i + 1).value = data[i]
                 row = row + 1
@@ -130,3 +129,9 @@ class ProductExcel(object):
     def project_name(self):
         file_name = os.path.basename(self.path).split(".")[0]
         return file_name
+
+    @staticmethod
+    def column_name_filet(name, allow_nullable=False):
+        if not allow_nullable and (not name or not name.strip()):
+            raise ValueError("字段不能为空")
+        return name.strip().title().replace("|", "&") if name else ""
