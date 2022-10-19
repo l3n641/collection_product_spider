@@ -6,8 +6,8 @@ from scrapy.http import JsonRequest
 from urllib.parse import urlparse
 
 
-class OnRunningSpider(CommonSpider):
-    name = 'onrunning'
+class OnRunningFrSpider(CommonSpider):
+    name = 'onrunning_fr'
     allowed_domains = ['on-running.com']
     base_url = "https://www.on-running.com/"
 
@@ -19,12 +19,8 @@ class OnRunningSpider(CommonSpider):
 
         product_category = self.product_category
         for url in product_category.keys():
-            try:
-                result = urlparse(url)
-                lang, explore, gender, product, *p_type = result.path.strip("/").split("/")
-            except Exception as e:
-                print(e)
-
+            result = urlparse(url)
+            lang, explore, gender, product, *p_type = result.path.strip("/").split("/")
             meta = {
                 "category_name": product_category.get(url),
                 "referer": url,
