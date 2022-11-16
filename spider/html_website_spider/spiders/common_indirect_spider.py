@@ -5,6 +5,7 @@ from scrapy.utils.project import get_project_settings
 import os
 import scrapy
 from ..items import ProductUrlItem, ProductDetailItem
+from . import ChromeBrowser
 
 
 class CommonIndirectSpider(scrapy.Spider):
@@ -143,3 +144,4 @@ class CommonIndirectSpider(scrapy.Spider):
             "callback": self.parse_product_detail,
         }
         return item_data
+
