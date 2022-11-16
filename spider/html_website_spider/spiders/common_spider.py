@@ -31,6 +31,8 @@ class CommonSpider(scrapy.Spider):
                 raise ValueError("任务文件和爬虫语言不匹配")
 
         product_category = file.get_category()
+        if not product_category:
+            raise ValueError("打开excel 文件失败")
         self.product_category = product_category
         self.project_name = file.project_name
         self.is_continue = is_continue
