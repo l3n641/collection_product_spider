@@ -8,8 +8,8 @@ from selenium.webdriver.chrome.options import Options
 
 class ChromeBrowser(Browser):
 
-    def __init__(self, executable_path, proxy_server=None):
-        chrome_options = self.get_chrome_option(proxy_server)
+    def __init__(self, executable_path, proxy_server=None, debugger_address=None):
+        chrome_options = self.get_chrome_option(proxy_server, debugger_address)
         service = self.get_chrome_server(executable_path)
         driver = webdriver.Chrome(service=service, options=chrome_options)
 
@@ -21,14 +21,19 @@ class ChromeBrowser(Browser):
         return service
 
     @classmethod
-    def get_chrome_option(cls, proxy_server=None):
+    def get_chrome_option(cls, proxy_server=None, debugger_address=None):
         chrome_options = Options()
-        prefs = {"profile.managed_default_content_settings.images": 2}
 
-        chrome_options.add_experimental_option('useAutomationExtension', False)
-        chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])
-        chrome_options.add_experimental_option("detach", True)
-        chrome_options.add_experimental_option("prefs", prefs)
+        if debugger_address:
+            chrome_options.add_experimental_option("debuggerAddress", debugger_address)
+
+        else:
+            prefs = {"profile.managed_default_content_settings.images": 2}
+
+            chrome_options.add_experimental_option('useAutomationExtension', False)
+            chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])
+            chrome_options.add_experimental_option("detach", True)
+            # chrome_options.add_experimental_option("prefs", prefs)
 
         if proxy_server:
             proxy_url = cls.proxy_dict_parse_to_url(proxy_server.get("type"), proxy_server.get("host"),
