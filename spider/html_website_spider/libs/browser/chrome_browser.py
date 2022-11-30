@@ -33,7 +33,7 @@ class ChromeBrowser(Browser):
             chrome_options.add_experimental_option('useAutomationExtension', False)
             chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])
             chrome_options.add_experimental_option("detach", True)
-            # chrome_options.add_experimental_option("prefs", prefs)
+            chrome_options.add_experimental_option("prefs", prefs)
 
         if proxy_server:
             proxy_url = cls.proxy_dict_parse_to_url(proxy_server.get("type"), proxy_server.get("host"),
