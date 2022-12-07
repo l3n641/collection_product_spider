@@ -7,8 +7,6 @@ from datetime import datetime
 from ..common_spider import CommonSpider
 from ..common_indirect_spider import CommonIndirectSpider
 from urllib.parse import urlencode
-from spider.html_website_spider.models import ProductUrl
-
 import json
 from urllib.parse import urlparse, parse_qsl
 
@@ -29,14 +27,8 @@ class LacosteSpider(CommonIndirectSpider):
 
         for item in data:
             link = item.attrib.get("href")
-            item_data = {
-                "category_name": response.meta.get("category_name"),
-                "detail_url": link,
-                "referer": response.meta.get("referer"),
-                "page_url": response.url,
-            }
-            for task in self.add_product_detail_url(**item_data):
-                yield task
+            link = self.get_api_url(link)
+            yield scrapy.Request(link, meta=response.meta, callback=self.parse_product_list2, dont_filter=True)
 
         if current_page < total_page:
             url_info = urlparse(response.url)
@@ -47,21 +39,36 @@ class LacosteSpider(CommonIndirectSpider):
             next_url = f"https://{url_info.hostname}{url_info.path}?{params}"
             yield scrapy.Request(next_url, meta=response.meta, callback=self.parse_product_list, dont_filter=True)
 
-    def parse_product_detail(self, response):
+    def parse_product_list2(self, response):
         data = response.json()
         product_data = data.get("product")
         variations = product_data.get("variations")
 
         if not variations or not variations.get("color"):
-            yield scrapy.Request(response.url, meta=response.meta, callback=self.parse_product_detail2,
-                                 dont_filter=True)
+            item_data = {
+                "category_name": response.meta.get("category_name"),
+                "detail_url": response.url,
+                "referer": response.meta.get("referer"),
+                "page_url": response.url,
+            }
+
+            for task in self.add_product_detail_url(**item_data):
+                yield task
+
         else:
             for color in variations.get("color").get("list"):
-                url = self.BASE_URL + f"{color.get('partialsUrl')}"
-                yield scrapy.Request(url, meta=response.meta, callback=self.parse_product_detail2,
-                                     dont_filter=True)
 
-    def parse_product_detail2(self, response):
+                url = self.BASE_URL + f"{color.get('partialsUrl')}"
+                item_data = {
+                    "category_name": response.meta.get("category_name"),
+                    "detail_url": url,
+                    "referer": response.meta.get("referer"),
+                    "page_url": response.url,
+                }
+                for task in self.add_product_detail_url(**item_data):
+                    yield task
+
+    def parse_product_detail(self, response):
         data = response.json()
         product_data = data.get("product")
         spu = product_data.get("id")
@@ -117,23 +124,9 @@ class LacosteSpider(CommonIndirectSpider):
         if item_data:
             yield ProductDetailItem(**item_data)
 
-    def get_product_detail_request_args(self, item):
-        """
-        获取重新详情页面的请求参数
-        :param item:
-        :return:
-        """
-        meta = {
-            "category_name": item.category_name,
-            "referer": item.referer,
 
-        }
-        url_info = urlparse(item.url)
+    def get_api_url(self, url):
+        url_info = urlparse(url)
         pid = url_info.path.split("/")[-1].split(".")[0]
         api_url = f"{self.product_detail_api}?pid={pid}&full=true&format=json"
-        item_data = {
-            "url": api_url,
-            "meta": meta,
-            "callback": self.parse_product_detail,
-        }
-        return item_data
+        return api_url
