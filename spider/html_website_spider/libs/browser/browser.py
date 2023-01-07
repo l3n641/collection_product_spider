@@ -7,6 +7,7 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.keys import Keys
 from urllib3.exceptions import MaxRetryError
 from urllib.parse import urlparse
+from selenium.webdriver.common.by import By
 
 
 class Browser(object):
@@ -34,8 +35,9 @@ class Browser(object):
             time.sleep(time_sleep)
 
     def click_by_script(self, xpath, time_sleep=1, timeout=10, ):
-        self.webdriver_wait_until(timeout, EC.presence_of_element_located((By.XPATH, xpath)))
-        element = self._driver.find_element_by_xpath(xpath)
+        element = self.webdriver_wait_until(timeout, EC.presence_of_element_located((By.XPATH, xpath)))
+        if not element:
+            return False
         self._driver.execute_script("arguments[0].click();", element)
         if time_sleep:
             time.sleep(time_sleep)
@@ -48,7 +50,10 @@ class Browser(object):
         :param time_sleep:
         :return:
         """
-        element = self.webdriver_wait_until(timeout, EC.presence_of_element_located((By.XPATH, xpath)))
+        try:
+            element = self.webdriver_wait_until(timeout, EC.presence_of_element_located((By.XPATH, xpath)))
+        except Exception as e:
+            return False
         if time_sleep:
             time.sleep(time_sleep)
         return element

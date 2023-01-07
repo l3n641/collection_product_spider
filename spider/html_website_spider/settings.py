@@ -37,8 +37,8 @@ NEWSPIDER_MODULE = 'html_website_spider.spiders'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
 
-COOKIES_ENABLED = True  # 启用cookie
-#COOKIES_DEBUG = True
+# COOKIES_ENABLED = False  # 启用cookie
+# COOKIES_DEBUG = True
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -75,7 +75,7 @@ ROBOTSTXT_OBEY = False
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-      'html_website_spider.middlewares.SimpleProxyMiddleware': 543,
+    'html_website_spider.middlewares.SimpleProxyMiddleware': 543,
 }
 
 # Enable or disable extensions
@@ -94,7 +94,7 @@ ITEM_PIPELINES = {
 # 设置图片下载路径
 IMAGES_STORE = image_store
 # 过期天数
-IMAGES_EXPIRES = 90  # 90天内抓取的都不会被重抓
+# IMAGES_EXPIRES = 90  # 90天内抓取的都不会被重抓
 
 DB_DIR_PATH = db_store
 
@@ -121,4 +121,6 @@ DB_DIR_PATH = db_store
 
 
 # 默认: 'DEBUG'，log的最低级别
-#LOG_LEVEL = "WARNING"
+LOG_LEVEL = "WARNING"
+# AUTOTHROTTLE_ENABLED = True
+# CONCURRENT_REQUESTS_PER_DOMAIN = 4

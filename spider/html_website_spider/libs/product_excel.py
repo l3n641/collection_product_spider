@@ -106,7 +106,7 @@ class ProductExcel(object):
                     "",
                     product.category_type,
                     product.gender,
-                    product.gender,
+                    product.gender_name,
                     product.color,
                     product.color,
                     product.basc,

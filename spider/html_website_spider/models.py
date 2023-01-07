@@ -47,10 +47,13 @@ class ProductDetail(Base):
 
     @property
     def gender(self):
-        if self.category_name:
-            category_names = self.category_name.split("|")
-            gender = category_names[0].split('->')[0]
-            return gender
+        genders = self.get_genders()
+        return "|".join(genders)
+
+    @property
+    def gender_name(self):
+        genders = self.get_genders()
+        return "/".join(genders)
 
     @property
     def cat_0(self):
@@ -75,6 +78,16 @@ class ProductDetail(Base):
 
     def get_brand(self, default_brand=None):
         return self.brand or default_brand
+
+    def get_genders(self):
+        genders = set()
+        if self.category_name:
+            category_names = self.category_name.split("|")
+            for item in category_names:
+                gender = item.split('->')[0]
+                genders.add(gender)
+
+        return genders
 
 
 class DownloadImageLog(Base):

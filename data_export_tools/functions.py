@@ -12,7 +12,7 @@ def get_sqlite_session(database_file_name):
     return session_class()
 
 
-def filter_empty_image(product_detail_data, image_path):
+def filter_empty_image(product_detail_data, image_path, check_all_image=False):
     new_product_detail_data = []
     failed_image_sku = []
     failed_first_image_sku = []
@@ -26,12 +26,14 @@ def filter_empty_image(product_detail_data, image_path):
             failed_first_image_sku.append(item.sku)
             failed_image_sku.append(item.sku)
             continue
-        images = item.img.split("|")
-        for image in images:
-            if item.sku not in image:
-                error_sku_img.append(item.sku)
-                failed_image_sku.append(item.sku)
-                break
+
+        if check_all_image:
+            images = item.img.split("|")
+            for image in images:
+                if item.sku not in image:
+                    error_sku_img.append(item.sku)
+                    failed_image_sku.append(item.sku)
+                    break
 
         new_product_detail_data.append(item)
         failed_image_info = {

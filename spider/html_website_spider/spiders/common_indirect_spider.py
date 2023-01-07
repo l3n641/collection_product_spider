@@ -5,16 +5,17 @@ from scrapy.utils.project import get_project_settings
 import os
 import scrapy
 from ..items import ProductUrlItem, ProductDetailItem
+from . import ChromeBrowser
 
 
-class CommonSpider(scrapy.Spider):
+class CommonIndirectSpider(scrapy.Spider):
     project_name = None
     check_lang = True
 
-    def __init__(self, category_file=None, is_continue=True, start_by_failed=False, *args, **kwargs):
+    def __init__(self, action, category_file=None, *args, **kwargs):
 
-        super(CommonSpider).__init__(*args, **kwargs)
-        is_continue = int(is_continue)
+        super(CommonIndirectSpider).__init__(*args, **kwargs)
+        self.action = int(action)
 
         project_settings = get_project_settings()
         category_file_path = os.path.join(project_settings.get("PROJECT_STORE"), category_file)
@@ -31,83 +32,50 @@ class CommonSpider(scrapy.Spider):
                 raise ValueError("任务文件和爬虫语言不匹配")
 
         product_category = file.get_category()
-        if not product_category:
-            raise ValueError("打开excel 文件失败")
         self.product_category = product_category
         self.project_name = file.project_name
-        self.is_continue = is_continue
-        self.start_by_failed = start_by_failed
-
-        if not is_continue:
-            # 重头开始下载内容
-            Sqlite.rename_old_database(file.project_name, project_settings.get("DB_DIR_PATH"))
 
         db_engine = Sqlite.get_sqlite_engine(file.project_name, project_settings.get("DB_DIR_PATH"))
         Sqlite.set_session_class(db_engine)
         Base.metadata.create_all(db_engine)
 
     def start_requests(self):
-        if self.start_by_failed:
-            for task in self.start_by_database():
-                yield task
-        else:
-            for task in self.start_by_product_category():
-                yield task
+        if self.action == 1:
+            urls = self.get_start_urls()
+            args = self.get_request_product_list_args()
+            for item in urls:
+                yield scrapy.Request(item.get("url"), meta=item.get("meta"), callback=self.parse_product_list, **args)
 
-    def start_by_product_category(self):
-        """
-        从产品分类里爬取数据
-        :return:
-        """
+        else:
+
+            data = self.get_failed_detail_urls()
+            for item in data:
+                request_data = self.get_product_detail_request_args(item)
+                yield scrapy.Request(**request_data)
+
+    def get_request_product_list_args(self):
+        return {
+            "errback": self.start_request_error,
+            "dont_filter": True
+        }
+
+    def get_start_urls(self):
+        return self.get_start_url_by_category()
+
+    def get_start_url_by_category(self):
         product_category = self.product_category
+        data_list = []
         for url in product_category.keys():
             meta = {
                 "category_name": product_category.get(url),
                 "referer": url,
-
             }
-            yield scrapy.Request(url, meta=meta, callback=self.parse_product_list, errback=self.start_request_error,
-                                 dont_filter=True)
-
-    def start_by_database(self):
-        """
-        从数据失败记录里开始
-        :return:
-        """
-        data = self.get_failed_detail_urls()
-        for item in data:
-            request_data = self.get_failed_quest_data(item)
-            yield scrapy.Request(**request_data)
-
-    def get_failed_quest_data(self, item: ProductUrl, **kwargs):
-        """
-        获取重新下载失败的详情页面的参数
-        :param item:
-        :param kwargs:
-        :return:
-        """
-        meta = {
-            "category_name": item.category_name,
-            "referer": item.referer,
-
-        }
-        item_data = {
-            "url": item.url,
-            "meta": meta,
-            "callback": self.parse_product_detail,
-        }
-        item_data.update(kwargs)
-        return item_data
-
-    @staticmethod
-    def get_failed_detail_urls():
-        """
-        获取失败的详情链接
-        :return: [ProductUrl]
-        """
-        session = Sqlite.get_session()
-        data = session.query(ProductUrl).filter(ProductUrl.status == 0).all()
-        return data
+            item = {
+                "url": url,
+                "meta": meta
+            }
+            data_list.append(item)
+        return data_list
 
     @staticmethod
     def start_request_error(failure):
@@ -128,23 +96,17 @@ class CommonSpider(scrapy.Spider):
                                                 ProductUrl.category_name == category_name).first()
         return data
 
-    def request_product_detail(self, detail_url, category_name, referer, page_url, **kwargs):
+    def add_product_detail_url(self, detail_url, category_name, referer, page_url, ):
         """
         请求详情页面
         :param detail_url:
         :param category_name:
         :param referer:
         :param page_url:
-        :param kwargs:
         :return:
         """
-        # 如果开启断点续传就从数据库获取数据后判断
-        data = None  # 数据库记录
-        if self.is_continue:
-            data = self.get_product_log(detail_url, category_name)
-            if data and data.status == 1:
-                return False
 
+        data = self.get_product_log(detail_url, category_name)
         if not data:
             item_data = {
                 "category_name": category_name,
@@ -154,4 +116,32 @@ class CommonSpider(scrapy.Spider):
                 "page_url": page_url,
             }
             yield ProductUrlItem(**item_data)
-        yield scrapy.Request(detail_url, **kwargs)
+
+    @staticmethod
+    def get_failed_detail_urls():
+        """
+        获取失败的详情链接
+        :return: [ProductUrl]
+        """
+        session = Sqlite.get_session()
+        data = session.query(ProductUrl).filter(ProductUrl.status == 0).all()
+        return data
+
+    def get_product_detail_request_args(self, item: ProductUrl):
+        """
+        获取重新详情页面的请求参数
+        :param item:
+        :return:
+        """
+        meta = {
+            "category_name": item.category_name,
+            "referer": item.referer,
+
+        }
+        item_data = {
+            "url": item.url,
+            "meta": meta,
+            "callback": self.parse_product_detail,
+        }
+        return item_data
+
