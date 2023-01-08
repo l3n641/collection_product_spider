@@ -45,15 +45,15 @@ class DatabaseSqlite(object):
         product_detail_datas = query.all()
         return product_detail_datas
 
-    def get_product_categories(self, product_url):
+    def get_product_categories(self, product_url, product_categories):
         query = self.session.query(ProductUrl)
         data = query.filter(ProductUrl.url == product_url).all()
-        categories = (item.category_name for item in data)
+        categories = (product_categories.get(item.referer) for item in data)
         return '|'.join(categories)
 
-    def update_product_category(self, product_detail_data):
+    def update_product_category(self, product_detail_data, product_categories):
         for product in product_detail_data:
-            categories = self.get_product_categories(product.PageUrl)
+            categories = self.get_product_categories(product.PageUrl, product_categories)
             if categories:
                 product.category_name = categories
         return product_detail_data
