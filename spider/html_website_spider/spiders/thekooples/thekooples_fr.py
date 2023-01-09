@@ -6,10 +6,11 @@ from .. import ProductUrlItem, ProductDetailItem
 from html import unescape
 from urllib.parse import urlencode
 from datetime import datetime
+import html
 
 
 class TheKooplesSpider(CommonSpider):
-    name = 'the_koople'
+    name = 'thekoople'
     allowed_domains = ['thekooples.com']
     base_url = "https://www.thekooples.com"
 
@@ -41,7 +42,7 @@ class TheKooplesSpider(CommonSpider):
 
         next_page_node = response.xpath(next_page_xpath)
         if next_page_node:
-            next_url = self.base_url + next_page_node.attrib.get("href")
+            next_url = next_page_node.attrib.get("href")
             yield scrapy.Request(next_url, meta=response.meta, callback=self.parse_product_list,
                                  errback=self.start_request_error)
 
@@ -49,13 +50,13 @@ class TheKooplesSpider(CommonSpider):
         title_xpath = '//h1[@class="product-name"]/text()'
         img_xpath = '//div[@id="panzoom-element"]/img'
         size_xpath = '//span[@class="size-field  selectable"]'
-        product_info_xpath = '//script[@type="application/ld+json]'
+        product_info_xpath = '//script[@type="application/ld+json"]'
 
-        data_str = response.xpath(product_info_xpath)[2]
+        data_str = response.xpath(product_info_xpath)[2].root.text.strip()[0:-1]
         product_data = json.loads(data_str)
         title = product_data.get("name")
         sku = product_data.get("sku")
-        description = product_data.get("description")
+        description = html.unescape(product_data.get("description"))
         color = product_data.get("color")
         price = product_data.get("offers").get('price')
 
@@ -66,13 +67,13 @@ class TheKooplesSpider(CommonSpider):
 
         sizes = []
         for node in response.xpath(size_xpath):
-            sizes.append(node.get())
+            sizes.append(node.root.text.strip())
 
         item_data = {
             "project_name": self.project_name,
             "PageUrl": response.url,
             "html_url": response.url,
-            "category_name": response.meta.get("category_name"),
+            "category_name": response.meta.get("category_name") or "1",
             "sku": sku,
             "color": color,
             "size": sizes,
@@ -81,13 +82,7 @@ class TheKooplesSpider(CommonSpider):
             "title": title,
             "dade": datetime.now(),
             "basc": description,
-            "brand": product_data.get("brand")
+            "brand": ""
         }
 
         yield ProductDetailItem(**item_data)
-
-
-def start_requests(self):
-    url = 'https://www.thekooples.com/fr/fr_FR/femme/pret-a-porter/manteaux-et-blousons/doudoune-vinyle-oversize-noire-bretelles-a-logo-FDOU25006KBLA01.html'
-    yield scrapy.Request(url, callback=self.parse_product_detail, errback=self.start_request_error,
-                         dont_filter=True)
