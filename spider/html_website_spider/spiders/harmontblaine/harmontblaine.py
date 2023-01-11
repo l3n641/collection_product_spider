@@ -8,6 +8,7 @@ from datetime import datetime
 from urllib.parse import urlparse
 import requests
 import re
+import hashlib
 
 
 class HarmontBlaineItSpider(CommonSpider):
@@ -38,7 +39,7 @@ class HarmontBlaineItSpider(CommonSpider):
 
         next_page_node = response.xpath(page_xpath)
         if next_page_node:
-            next_url = self.base_url + next_page_node.attrib.get("href")
+            next_url = next_page_node.attrib.get("href")
             yield scrapy.Request(next_url, meta=response.meta, callback=self.parse_product_list,
                                  errback=self.start_request_error)
 
@@ -49,13 +50,13 @@ class HarmontBlaineItSpider(CommonSpider):
         desc_xpath = '//div[@id="Dettaglio"]/ul'
         img_xpath = '//ul[@class="thumbelina"]/li/a'
         size_xpath = '//div[@class="skywalker_scheda_capoabbigliamento_taglie"]//ul/li/a'
-        sku_pattern = "<p>SKU:(.*?)</p>"
         other_color_xpath = '//li[@class="tassello"]/a'
 
         title = response.xpath(title_xpath).get()
         price = response.xpath(price_xpath).get().replace("€", "").replace(",", '.')
-        sku = response.selector.re_first(sku_pattern)
-        description = response.xpath(desc_xpath).root.text
+        sku = hashlib.md5(response.url.encode(encoding='UTF-8')).hexdigest()
+
+        description = response.xpath(desc_xpath).get()
         color = response.xpath(color_xpath).attrib.get("title")
 
         images = []
@@ -85,7 +86,7 @@ class HarmontBlaineItSpider(CommonSpider):
 
         yield ProductDetailItem(**item_data)
 
-        other_colors=response.xpath(other_color_xpath)
+        other_colors = response.xpath(other_color_xpath)
         for data in other_colors:
             detail_url = data.attrib.get("href")
             item_data = {
@@ -99,7 +100,3 @@ class HarmontBlaineItSpider(CommonSpider):
 
             for task in self.request_product_detail(**item_data):
                 yield task
-
-    def start_requests(self):
-        url = 'https://www.harmontblaine.com/it-IT-it/product_camicia-a-quadri-mini-blutaglia-s_509779001.aspx'
-        yield scrapy.Request(url, callback=self.parse_product_detail, errback=self.start_request_error, )
