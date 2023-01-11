@@ -6,3 +6,6 @@ venv/
 .env
 debug.py
 proxy_list.txt
+spider/html_website_spider/spiders/*/
+chromedriver.exe
+

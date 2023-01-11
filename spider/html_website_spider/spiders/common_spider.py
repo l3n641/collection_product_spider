@@ -4,17 +4,21 @@ from ..libs.sqlite import Sqlite
 from scrapy.utils.project import get_project_settings
 import os
 import scrapy
-from ..items import ProductUrlItem, ProductDetailItem
+from ..items import ProductUrlItem
+import hashlib
+from urllib.parse import urlencode
+from urllib.parse import urlparse, parse_qsl
 
 
 class CommonSpider(scrapy.Spider):
+    """ 爬虫基类"""
     project_name = None
-    check_lang = True
 
-    def __init__(self, category_file=None, is_continue=True, start_by_failed=False, *args, **kwargs):
+    def __init__(self, category_file=None, is_continue=True, start_by_failed=False, check_lang=True, *args, **kwargs):
 
         super(CommonSpider).__init__(*args, **kwargs)
         is_continue = int(is_continue)
+        check_lang = int(check_lang)
 
         project_settings = get_project_settings()
         category_file_path = os.path.join(project_settings.get("PROJECT_STORE"), category_file)
@@ -23,7 +27,7 @@ class CommonSpider(scrapy.Spider):
             raise ValueError("产品类别文件不存在")
 
         file = ProductExcel(category_file_path)
-        if self.check_lang:
+        if check_lang:
             spider_data = self.name.split("_")
 
             lang = spider_data[-1] if len(spider_data) > 1 else "en"
@@ -35,7 +39,6 @@ class CommonSpider(scrapy.Spider):
             raise ValueError("打开excel 文件失败")
         self.product_category = product_category
         self.project_name = file.project_name
-        self.is_continue = is_continue
         self.start_by_failed = start_by_failed
 
         if not is_continue:
@@ -46,13 +49,77 @@ class CommonSpider(scrapy.Spider):
         Sqlite.set_session_class(db_engine)
         Base.metadata.create_all(db_engine)
 
-    def start_requests(self):
-        if self.start_by_failed:
-            for task in self.start_by_database():
-                yield task
+    @staticmethod
+    def start_request_error(failure):
+        session = Sqlite.get_session()
+        data = {
+            'url': failure.request.meta.get("referer"),
+            'category_name': failure.request.meta.get("category_name"),
+        }
+        log = FailedCategory(**data)
+        session.add(log)
+        session.commit()
+        print(f"excel 链接无效:{failure.request.url}")
+
+    @staticmethod
+    def get_product_log(detail_url, category_name=None):
+        session = Sqlite.get_session()
+        data = session.query(ProductUrl).filter(ProductUrl.url == detail_url)
+        if category_name:
+            data = data.filter(ProductUrl.category_name == category_name)
+        return data.first()
+
+    def request_product_detail(self, detail_url, category_name, referer, page_url, **kwargs):
+        """
+        请求详情页面
+        :param detail_url:
+        :param category_name:
+        :param referer:
+        :param page_url:
+        :param kwargs:
+        :return:
+        """
+
+        data = self.get_product_log(detail_url, category_name)
+        if data and data.status == 1:
+            return False
         else:
-            for task in self.start_by_product_category():
-                yield task
+            item_data = {
+                "category_name": category_name,
+                "url": detail_url,
+                "referer": referer,
+                "status": 0,
+                "page_url": page_url,
+            }
+            yield ProductUrlItem(**item_data)
+            yield scrapy.Request(detail_url, **kwargs)
+
+    def get_request_product_list_args(self):
+        return {
+            "errback": self.start_request_error,
+            "dont_filter": True
+        }
+
+    def add_product_detail_url(self, detail_url, category_name, referer, page_url, ):
+        """
+        请求详情页面
+        :param detail_url:
+        :param category_name:
+        :param referer:
+        :param page_url:
+        :return:
+        """
+
+        data = self.get_product_log(detail_url, category_name)
+        if not data:
+            item_data = {
+                "category_name": category_name,
+                "url": detail_url,
+                "referer": referer,
+                "status": 0,
+                "page_url": page_url,
+            }
+            yield ProductUrlItem(**item_data)
 
     def start_by_product_category(self):
         """
@@ -69,89 +136,25 @@ class CommonSpider(scrapy.Spider):
             yield scrapy.Request(url, meta=meta, callback=self.parse_product_list, errback=self.start_request_error,
                                  dont_filter=True)
 
-    def start_by_database(self):
-        """
-        从数据失败记录里开始
-        :return:
-        """
-        data = self.get_failed_detail_urls()
-        for item in data:
-            request_data = self.get_failed_quest_data(item)
-            yield scrapy.Request(**request_data)
-
-    def get_failed_quest_data(self, item: ProductUrl, **kwargs):
-        """
-        获取重新下载失败的详情页面的参数
-        :param item:
-        :param kwargs:
-        :return:
-        """
-        meta = {
-            "category_name": item.category_name,
-            "referer": item.referer,
-
-        }
-        item_data = {
-            "url": item.url,
-            "meta": meta,
-            "callback": self.parse_product_detail,
-        }
-        item_data.update(kwargs)
-        return item_data
+    @staticmethod
+    def get_url_md5(url):
+        """获取链接md5"""
+        url_hash = hashlib.md5(url.encode(encoding='UTF-8')).hexdigest()
+        return url_hash
 
     @staticmethod
-    def get_failed_detail_urls():
-        """
-        获取失败的详情链接
-        :return: [ProductUrl]
-        """
-        session = Sqlite.get_session()
-        data = session.query(ProductUrl).filter(ProductUrl.status == 0).all()
-        return data
+    def get_url_params(url):
+        """获取url链接参数"""
+        url_info = urlparse(url)
+        params = dict(parse_qsl(url_info.query))
+        return params
 
     @staticmethod
-    def start_request_error(failure):
-        session = Sqlite.get_session()
-        data = {
-            'url': failure.request.meta.get("referer"),
-            'category_name': failure.request.meta.get("category_name"),
-        }
-        log = FailedCategory(**data)
-        session.add(log)
-        session.commit()
-        print(f"excel 链接无效:{failure.request.url}")
+    def make_url_with_query(base_url, params: dict):
+        query = urlencode(params)
+        return base_url + "?" + query
 
     @staticmethod
-    def get_product_log(detail_url, category_name):
-        session = Sqlite.get_session()
-        data = session.query(ProductUrl).filter(ProductUrl.url == detail_url,
-                                                ProductUrl.category_name == category_name).first()
-        return data
-
-    def request_product_detail(self, detail_url, category_name, referer, page_url, **kwargs):
-        """
-        请求详情页面
-        :param detail_url:
-        :param category_name:
-        :param referer:
-        :param page_url:
-        :param kwargs:
-        :return:
-        """
-        # 如果开启断点续传就从数据库获取数据后判断
-        data = None  # 数据库记录
-        if self.is_continue:
-            data = self.get_product_log(detail_url, category_name)
-            if data and data.status == 1:
-                return False
-
-        if not data:
-            item_data = {
-                "category_name": category_name,
-                "url": detail_url,
-                "referer": referer,
-                "status": 0,
-                "page_url": page_url,
-            }
-            yield ProductUrlItem(**item_data)
-        yield scrapy.Request(detail_url, **kwargs)
+    def get_base_url(url):
+        info = urlparse(url)
+        return f"{info.scheme}://{info.hostname}{info.path}"

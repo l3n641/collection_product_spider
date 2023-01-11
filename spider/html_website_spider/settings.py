@@ -88,7 +88,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'html_website_spider.pipelines.ProductUrlPipeline': 300,
-    'html_website_spider.pipelines.ProductDetailPipeline': 299,
+    'html_website_spider.pipelines.ProductDetailNoCachedPipeline': 299,
 }
 
 # 设置图片下载路径
