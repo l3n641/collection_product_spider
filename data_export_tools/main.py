@@ -33,14 +33,8 @@ class MainWindow(QMainWindow):
         self.main_view.button_check_data.clicked.connect(self.check_data)
         self.main_view.button_set_default_brand.clicked.connect(self.set_default_brand)
         self.main_view.button_export_data.clicked.connect(self.export_data)
-        self.main_view.combobox_size_temolate.currentTextChanged.connect(self.get_size_tmp_detail)
-        self.main_view.button_update_size.clicked.connect(self.update_size_by_category)
-        self.main_view.combo_box_category.currentTextChanged.connect(self.set_category_to_category_size_input)
-        self.main_view.combobox_category_name.currentTextChanged.connect(self.set_category_to_old_category_input)
-        self.main_view.button_upate_category_name.clicked.connect(self.update_category_name)
         self.main_view.button_clear_log.clicked.connect(self.clear_log)
-        self.main_view.button_merge_product_category.clicked.connect(self.merge_product_category)
-        self.main_view.button_update_pre_product_category.clicked.connect(self.update_pre_product_category)
+
 
     def load_project_file(self):
         """
@@ -70,13 +64,6 @@ class MainWindow(QMainWindow):
             return False
 
         self.category_data = category_data
-        for url in category_data:
-            self.main_view.combo_box_category.addItem(category_data.get(url))
-            self.main_view.combobox_category_name.addItem(category_data.get(url))
-
-        data = SizeGuide.get_size_name_list()
-        self.main_view.combobox_size_temolate.addItems(data)
-
         self.database_file = database_file
         self.image_dir = image_dir
         self.main_view.label_project_file.setText(file_path)
@@ -100,7 +87,10 @@ class MainWindow(QMainWindow):
 
     def merge_product_category(self):
         db_server = DatabaseSqlite(self.database_file)
-        self.product_details = db_server.update_product_category(self.product_details)
+        for product in self.product_details:
+            categories = db_server.get_product_categories(product.PageUrl, self.category_data)
+            if categories:
+                product.category_name = categories
         self.main_view.textarea_log.append("合并产品分类成功")
 
     def clear_log(self):
@@ -143,6 +133,7 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "信息", "设置默认品牌成功", QMessageBox.Yes)
 
     def export_data(self):
+        self.merge_product_category()
         save_dir = os.path.dirname(self.product_file.path)
         export_dir = os.path.join(save_dir, "export")
         if not os.path.exists(export_dir):
@@ -155,64 +146,6 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "信息", "导出完成", QMessageBox.Yes)
         else:
             QMessageBox.critical(self, "错误", "导出数据失败", QMessageBox.Yes, QMessageBox.Yes)
-
-    def get_size_tmp_detail(self, value):
-        data = value.split("->")
-        res = SizeGuide.get_default_size(*data)
-        if res:
-            self.main_view.input_size.setText('|'.join(res))
-
-    def set_category_to_category_size_input(self, value):
-        self.main_view.input_category_pattern.setText(value)
-
-    def set_category_to_old_category_input(self, value):
-        self.main_view.input_category_name_pattern.setText(value)
-
-    def update_category_name(self):
-        new_category_name = self.main_view.input_new_category_name.text()
-        category = self.main_view.input_category_name_pattern.text()
-        row = 0
-        for item in self.product_details:
-            if item.category_name and item.category_name.startswith(category):
-                item.category_name = new_category_name
-                row = row + 1
-
-        self.main_view.textarea_log.append(f"类别:{category},更新类别名称{new_category_name}，更新数量{row}")
-
-    def update_size_by_category(self):
-        new_size = self.main_view.input_size.text()
-        category = self.main_view.input_category_pattern.text()
-        row = 0
-        for item in self.product_details:
-            if item.category_name and item.category_name.startswith(category):
-                item.size = new_size
-                row = row + 1
-
-        self.main_view.textarea_log.append(f"类别:{category},更新尺码{new_size}，更新数量{row}")
-
-    def update_pre_product_category(self):
-        if not self.category_data:
-            QMessageBox.critical(self, "错误", "请先加载产品初始文件", QMessageBox.Yes, QMessageBox.Yes)
-            return False
-
-        category_list = []
-        for url in self.category_data:
-            category_list.append(self.category_data.get(url).strip())
-
-        project_path = os.getenv("PROJECT_STORE", QDir.currentPath())
-        file_path, _ = QFileDialog.getOpenFileName(self, "请选择文件", project_path, "预处理产品文件(*.xlsx)")
-        if not file_path:
-            return
-
-        pre_product_excel = PreProductExcel(file_path)
-        save_dir = os.path.dirname(self.product_file.path)
-        export_dir = os.path.join(save_dir, "pre_product")
-        if not os.path.exists(export_dir):
-            os.makedirs(export_dir)
-        file_name = os.path.basename(file_path)
-        export_path = os.path.join(export_dir, file_name)
-        pre_product_excel.update_product_category(category_list, export_path=export_path)
-        QMessageBox.information(self, "信息", "导出完成", QMessageBox.Yes)
 
 
 if __name__ == "__main__":
