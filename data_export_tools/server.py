@@ -48,8 +48,11 @@ class DatabaseSqlite(object):
     def get_product_categories(self, product_url, product_categories):
         query = self.session.query(ProductUrl)
         data = query.filter(ProductUrl.url == product_url).all()
-        categories = (product_categories.get(item.referer) for item in data)
-        categories = set(categories)
+        categories = set()
+        for item in data:
+            category = product_categories.get(item.referer)
+            if category:
+                categories.add(category)
         return '|'.join(categories)
 
     def update_product_category(self, product_detail_data, product_categories):

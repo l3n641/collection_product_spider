@@ -120,7 +120,8 @@ DB_DIR_PATH = db_store
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 
+URLLENGTH_LIMIT = 5000
 # 默认: 'DEBUG'，log的最低级别
-LOG_LEVEL = "WARNING"
+#LOG_LEVEL = "WARNING"
 # AUTOTHROTTLE_ENABLED = True
 # CONCURRENT_REQUESTS_PER_DOMAIN = 4

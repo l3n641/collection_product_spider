@@ -10,9 +10,9 @@ class ProductUrl(Base):
     __tablename__ = 'product_urls'
 
     id = Column(Integer, autoincrement=True, nullable=False, primary_key=True)
-    url = Column(String(1024), nullable=False, index=True, comment="详情页链接")
+    url = Column(Text, nullable=False, index=True, comment="详情页链接")
     category_name = Column(String(128), nullable=False)
-    referer = Column(String(1024), nullable=False, comment="产品分类链接")
+    referer = Column(Text, nullable=False, comment="产品分类链接")
     page_url = Column(Text, comment="获取详情链接的页面url")
     status = Column(Integer, nullable=False, server_default="0", comment="下载状态,0-还没下载，1-已经下载")
 
