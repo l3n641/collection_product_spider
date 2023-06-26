@@ -89,8 +89,7 @@ class MainWindow(QMainWindow):
         db_server = DatabaseSqlite(self.database_file)
         for product in self.product_details:
             categories = db_server.get_product_categories(product.PageUrl, self.category_data)
-            if categories:
-                product.category_name = categories
+            product.category_name = categories
         self.main_view.textarea_log.append("合并产品分类成功")
 
     def clear_log(self):

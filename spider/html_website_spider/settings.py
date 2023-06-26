@@ -88,7 +88,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'html_website_spider.pipelines.ProductUrlPipeline': 300,
-    'html_website_spider.pipelines.ProductDetailPipeline': 299,
+    'html_website_spider.pipelines.ProductDetailNoCachedPipeline': 299,
 }
 
 # 设置图片下载路径
@@ -120,7 +120,8 @@ DB_DIR_PATH = db_store
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 
+URLLENGTH_LIMIT = 5000
 # 默认: 'DEBUG'，log的最低级别
-LOG_LEVEL = "WARNING"
+#LOG_LEVEL = "WARNING"
 # AUTOTHROTTLE_ENABLED = True
 # CONCURRENT_REQUESTS_PER_DOMAIN = 4
